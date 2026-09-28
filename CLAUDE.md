@@ -35,6 +35,10 @@ This directory is a standalone, framework-free HTML/JS prototype (React + Babel 
 
 The five screens map to the routes the real app should eventually expose: library (home), game detail, game player, auth, and hall of fame.
 
+## Skills
+
+Usa siempre /frontend-design para diseñar la interfaz de usuario
+
 ## Stack notes
 
 - Next.js 16 App Router, React 19, TypeScript, Tailwind CSS v4 (CSS-first config via `@theme inline` in `app/globals.css`, no `tailwind.config.*` file).
