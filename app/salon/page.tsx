@@ -1,18 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import Podium from "@/components/podium";
 import { GAMES, seededScores } from "@/lib/data";
-import { getUser, type User } from "@/lib/session";
+import { useUser } from "@/lib/session";
 
 export default function HallOfFamePage() {
   const [tab, setTab] = useState(GAMES[0].id);
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    setUser(getUser());
-  }, []);
+  const user = useUser();
 
   const rows = useMemo(() => seededScores(tab.length * 23 + 7, 12), [tab]);
   const game = GAMES.find((g) => g.id === tab)!;

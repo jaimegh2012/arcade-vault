@@ -6,7 +6,7 @@
 
 **Objetivo:** Portar las cinco pantallas del prototipo de referencia (`references/templates`) a rutas reales de Next.js App Router, con el mismo diseño visual y los mismos estados simulados (sesión, filtros, puntuación), sin implementar ningún motor de juego real.
 
-## Alcancecm
+## Alcance
 
 **Incluido:**
 

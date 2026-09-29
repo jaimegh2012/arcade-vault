@@ -4,7 +4,7 @@ import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { notFound } from "next/navigation";
 import { GAMES } from "@/lib/data";
-import { getUser, saveScore } from "@/lib/session";
+import { saveScore, useUser } from "@/lib/session";
 
 export default function GamePlayerPage(props: PageProps<"/juegos/[id]/jugar">) {
   const { id } = use(props.params);
@@ -12,18 +12,16 @@ export default function GamePlayerPage(props: PageProps<"/juegos/[id]/jugar">) {
   const game = GAMES.find((g) => g.id === id);
   if (!game) notFound();
 
+  const user = useUser();
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
-  const [level, setLevel] = useState(1);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
-  const [name, setName] = useState("INVITADO");
+  const [nameOverride, setNameOverride] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    const user = getUser();
-    if (user) setName(user.name);
-  }, []);
+  const level = Math.floor(score / 2500) + 1;
+  const name = nameOverride ?? (user ? user.name : "INVITADO");
 
   useEffect(() => {
     if (over || paused) return;
@@ -31,17 +29,13 @@ export default function GamePlayerPage(props: PageProps<"/juegos/[id]/jugar">) {
     return () => clearInterval(t);
   }, [over, paused]);
 
-  useEffect(() => {
-    if (score > 0 && score % 2500 < 100) setLevel((l) => l + 1);
-  }, [score]);
-
   const endGame = () => setOver(true);
   const restart = () => {
     setScore(0);
     setLives(3);
-    setLevel(1);
     setPaused(false);
     setOver(false);
+    setNameOverride(null);
     setSaved(false);
   };
 
@@ -123,7 +117,7 @@ export default function GamePlayerPage(props: PageProps<"/juegos/[id]/jugar">) {
               <div className="input-row">
                 <input
                   value={name}
-                  onChange={(e) => setName(e.target.value.toUpperCase().slice(0, 10))}
+                  onChange={(e) => setNameOverride(e.target.value.toUpperCase().slice(0, 10))}
                   placeholder="TUS INICIALES"
                 />
                 <button

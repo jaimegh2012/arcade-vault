@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Standalone HTML/JS UX prototype — not part of the Next.js build, see CLAUDE.md.
+    "references/**",
   ]),
 ]);
 
