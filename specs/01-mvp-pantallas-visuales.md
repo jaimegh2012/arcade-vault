@@ -1,6 +1,6 @@
 # 01 — MVP visual: pantallas de Arcade Vault
 
-- **Estado:** Approved
+- **Estado:** Implementado
 - **Depende de:** Ninguno (primer spec del proyecto)
 - **Fecha:** 2026-09-28
 
