@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useActionState, useState, type FormEvent } from "react";
 import HighlightIcon, { type HighlightKind } from "@/components/highlight-icon";
 import { useReveal } from "@/hooks/use-reveal";
+import { sendContact, type ContactState } from "./actions";
 
 const HIGHLIGHTS: { i: HighlightKind; t: string; c: string }[] = [
   { i: "HEART", t: "HECHO CON ❤️ PARA JUGADORES", c: "magenta" },
@@ -12,22 +13,136 @@ const HIGHLIGHTS: { i: HighlightKind; t: string; c: string }[] = [
 
 const EMPTY_FORM = { name: "", email: "", msg: "" };
 
-export default function AcercaDe() {
-  useReveal();
+const IDLE: ContactState = { status: "idle" };
+
+function ContactForm({ onReset }: { onReset: () => void }) {
   const [form, setForm] = useState(EMPTY_FORM);
-  const [sent, setSent] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
 
-  // TODO(paso 7): reemplazar el éxito simulado por useActionState(sendContact)
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!form.name.trim() || !form.email.trim() || !form.msg.trim()) {
-      setShake(true);
-      setTimeout(() => setShake(false), 400);
-      return;
-    }
-    setSent(form.name.trim());
+  const triggerShake = () => {
+    setShake(true);
+    setTimeout(() => setShake(false), 400);
   };
+
+  const [state, formAction, pending] = useActionState(
+    async (prev: ContactState, formData: FormData) => {
+      const next = await sendContact(prev, formData);
+      if (next.status === "error") {
+        setForm(next.fields);
+        triggerShake();
+      }
+      return next;
+    },
+    IDLE,
+  );
+
+  // Validación de cliente: campos vacíos → shake sin llamar al servidor
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    if (!form.name.trim() || !form.email.trim() || !form.msg.trim()) {
+      e.preventDefault();
+      triggerShake();
+    }
+  };
+
+  return (
+    <form
+      className={"contact-form" + (shake ? " shake" : "")}
+      action={formAction}
+      onSubmit={onSubmit}
+      noValidate
+    >
+      {state.status !== "success" ? (
+        <>
+          <div className="field">
+            <label htmlFor="name">NOMBRE</label>
+            <input
+              id="name"
+              name="name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="px_kai"
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="email">CORREO ELECTRÓNICO</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              placeholder="jugador@vault.gg"
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="msg">MENSAJE</label>
+            <textarea
+              id="msg"
+              name="msg"
+              rows={5}
+              value={form.msg}
+              onChange={(e) => setForm({ ...form, msg: e.target.value })}
+              placeholder="Cuéntanos qué tienes en mente…"
+            ></textarea>
+          </div>
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+          />
+          {state.status === "error" && (
+            <div className="terminal-success term-error fade-in" role="alert">
+              <div className="term-body">
+                <div className="line error">[ERROR] {state.message}</div>
+              </div>
+            </div>
+          )}
+          <button
+            className="btn xl press"
+            type="submit"
+            disabled={pending}
+            style={{ width: "100%" }}
+          >
+            {pending ? "ENVIANDO…" : <>▶&nbsp;&nbsp;ENVIAR MENSAJE</>}
+          </button>
+        </>
+      ) : (
+        <div className="terminal-success">
+          <div className="term-bar">
+            <span className="dot r"></span><span className="dot y"></span><span className="dot g"></span>
+            <span className="term-title">VAULT-OS // TERMINAL</span>
+          </div>
+          <div className="term-body">
+            <div className="line"><span className="prompt">vault@arcade:~$</span> ./send_message --to=team</div>
+            <div className="line dim">[OK] Conectando con servidor…</div>
+            <div className="line dim">[OK] Validando contenido…</div>
+            <div className="line dim">[OK] Transmitiendo paquete…</div>
+            <div className="line success">
+              &gt; MENSAJE RECIBIDO. TE RESPONDEREMOS PRONTO. GRACIAS, {state.name.toUpperCase()}.
+              <span className="caret">_</span>
+            </div>
+            <div style={{ marginTop: 18 }}>
+              <button
+                className="btn ghost"
+                type="button"
+                onClick={onReset}
+              >
+                ENVIAR OTRO MENSAJE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </form>
+  );
+}
+
+export default function AcercaDe() {
+  useReveal();
+  const [formKey, setFormKey] = useState(0);
 
   return (
     <div className="about fade-in">
@@ -79,76 +194,7 @@ export default function AcercaDe() {
             </div>
           </div>
 
-          <form className={"contact-form" + (shake ? " shake" : "")} onSubmit={onSubmit} noValidate>
-            {!sent ? (
-              <>
-                <div className="field">
-                  <label htmlFor="name">NOMBRE</label>
-                  <input
-                    id="name"
-                    name="name"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="px_kai"
-                  />
-                </div>
-                <div className="field">
-                  <label htmlFor="email">CORREO ELECTRÓNICO</label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    placeholder="jugador@vault.gg"
-                  />
-                </div>
-                <div className="field">
-                  <label htmlFor="msg">MENSAJE</label>
-                  <textarea
-                    id="msg"
-                    name="msg"
-                    rows={5}
-                    value={form.msg}
-                    onChange={(e) => setForm({ ...form, msg: e.target.value })}
-                    placeholder="Cuéntanos qué tienes en mente…"
-                  ></textarea>
-                </div>
-                <button className="btn xl press" type="submit" style={{ width: "100%" }}>
-                  ▶&nbsp;&nbsp;ENVIAR MENSAJE
-                </button>
-              </>
-            ) : (
-              <div className="terminal-success">
-                <div className="term-bar">
-                  <span className="dot r"></span><span className="dot y"></span><span className="dot g"></span>
-                  <span className="term-title">VAULT-OS // TERMINAL</span>
-                </div>
-                <div className="term-body">
-                  <div className="line"><span className="prompt">vault@arcade:~$</span> ./send_message --to=team</div>
-                  <div className="line dim">[OK] Conectando con servidor…</div>
-                  <div className="line dim">[OK] Validando contenido…</div>
-                  <div className="line dim">[OK] Transmitiendo paquete…</div>
-                  <div className="line success">
-                    &gt; MENSAJE RECIBIDO. TE RESPONDEREMOS PRONTO. GRACIAS, {sent.toUpperCase()}.
-                    <span className="caret">_</span>
-                  </div>
-                  <div style={{ marginTop: 18 }}>
-                    <button
-                      className="btn ghost"
-                      type="button"
-                      onClick={() => {
-                        setSent(null);
-                        setForm(EMPTY_FORM);
-                      }}
-                    >
-                      ENVIAR OTRO MENSAJE
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </form>
+          <ContactForm key={formKey} onReset={() => setFormKey((k) => k + 1)} />
         </div>
       </section>
     </div>
