@@ -10,8 +10,9 @@ export default function Nav() {
   const [open, setOpen] = useState(false);
   const user = useUser();
 
-  const isActive = (name: "biblioteca" | "salon" | "auth") => {
-    if (name === "biblioteca") return pathname === "/" || pathname.startsWith("/juegos");
+  const isActive = (name: "inicio" | "biblioteca" | "salon" | "auth") => {
+    if (name === "inicio") return pathname === "/";
+    if (name === "biblioteca") return pathname.startsWith("/biblioteca") || pathname.startsWith("/juegos");
     if (name === "salon") return pathname.startsWith("/salon");
     return pathname.startsWith("/auth");
   };
@@ -30,7 +31,10 @@ export default function Nav() {
           </div>
         </Link>
         <div className="links">
-          <Link href="/" className={isActive("biblioteca") ? "active" : ""}>
+          <Link href="/" className={isActive("inicio") ? "active" : ""}>
+            Inicio
+          </Link>
+          <Link href="/biblioteca" className={isActive("biblioteca") ? "active" : ""}>
             Biblioteca
           </Link>
           <Link href="/salon" className={isActive("salon") ? "active" : ""}>
@@ -70,6 +74,13 @@ export default function Nav() {
         </div>
         <Link
           href="/"
+          className={isActive("inicio") ? "active" : ""}
+          onClick={() => setOpen(false)}
+        >
+          Inicio
+        </Link>
+        <Link
+          href="/biblioteca"
           className={isActive("biblioteca") ? "active" : ""}
           onClick={() => setOpen(false)}
         >
