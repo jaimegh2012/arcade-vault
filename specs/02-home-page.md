@@ -1,6 +1,6 @@
 # 02 — Home Page (landing) de Arcade Vault
 
-- **Estado:** Aprovado
+- **Estado:** Implementado
 - **Depende de:** SPEC 01
 - **Fecha:** 2026-09-29
 
@@ -68,19 +68,19 @@ Los puntajes se formatean con `toLocaleString("es-ES")`, igual que el prototipo.
 
 ## Criterios de aceptación
 
-- [ ] `/` renderiza sin errores el Home con las 7 secciones (hero, por qué, juegos, stats, actividad, precios, CTA final) dentro del layout con `Nav` y footer.
-- [ ] `/biblioteca` muestra la Biblioteca con búsqueda y filtro por categoría, idéntica a la anterior `/`.
-- [ ] El Nav muestra "Inicio" y "Biblioteca" (escritorio y panel móvil); "Inicio" está activo solo en `/`; "Biblioteca" está activo en `/biblioteca` y `/juegos/*`.
-- [ ] El Nav no muestra link "Acerca de" y `/acerca-de` no existe.
-- [ ] Los botones "EXPLORAR JUEGOS", "VER TODOS LOS JUEGOS" e "INSERTAR MONEDA" navegan a `/biblioteca`.
-- [ ] Los botones "CREAR CUENTA" y "EMPEZAR GRATIS" navegan a `/auth`; "VER SALÓN →" navega a `/salon`.
-- [ ] El rail muestra exactamente 6 juegos (`GAMES.slice(0, 6)`) y cada `MiniCard` navega a `/juegos/[id]` correspondiente.
-- [ ] Las 4 feature cards, 3 stats, 7 puntuaciones recientes, 5 top jugadores, la lista de 6 ítems del plan y las 3 FAQs coinciden con los textos de `home.jsx`.
-- [ ] Las secciones con clase `reveal` aparecen (clase `in`) al entrar en el viewport al hacer scroll.
-- [ ] "VOLVER AL VAULT" (detalle), el botón de salir del reproductor y el link del salón llevan a `/biblioteca`.
-- [ ] Iniciar sesión o entrar como invitado en `/auth` redirige a `/` (Home).
-- [ ] El diseño (colores, tipografías, glow, siluetas flotantes, responsive móvil) coincide con `arcade-vault-standalone.html`.
-- [ ] `npm run lint` y `npm run build` pasan sin errores.
+- [x] `/` renderiza sin errores el Home con las 7 secciones (hero, por qué, juegos, stats, actividad, precios, CTA final) dentro del layout con `Nav` y footer.
+- [x] `/biblioteca` muestra la Biblioteca con búsqueda y filtro por categoría, idéntica a la anterior `/`.
+- [x] El Nav muestra "Inicio" y "Biblioteca" (escritorio y panel móvil); "Inicio" está activo solo en `/`; "Biblioteca" está activo en `/biblioteca` y `/juegos/*`.
+- [x] El Nav no muestra link "Acerca de" y `/acerca-de` no existe.
+- [x] Los botones "EXPLORAR JUEGOS", "VER TODOS LOS JUEGOS" e "INSERTAR MONEDA" navegan a `/biblioteca`.
+- [x] Los botones "CREAR CUENTA" y "EMPEZAR GRATIS" navegan a `/auth`; "VER SALÓN →" navega a `/salon`.
+- [x] El rail muestra exactamente 6 juegos (`GAMES.slice(0, 6)`) y cada `MiniCard` navega a `/juegos/[id]` correspondiente.
+- [x] Las 4 feature cards, 3 stats, 7 puntuaciones recientes, 5 top jugadores, la lista de 6 ítems del plan y las 3 FAQs coinciden con los textos de `home.jsx`.
+- [x] Las secciones con clase `reveal` aparecen (clase `in`) al entrar en el viewport al hacer scroll.
+- [x] "VOLVER AL VAULT" (detalle), el botón de salir del reproductor y el link del salón llevan a `/biblioteca`.
+- [x] Iniciar sesión o entrar como invitado en `/auth` redirige a `/` (Home).
+- [x] El diseño (colores, tipografías, glow, siluetas flotantes, responsive móvil) coincide con `arcade-vault-standalone.html`.
+- [x] `npm run lint` y `npm run build` pasan sin errores.
 
 ## Decisiones tomadas y descartadas
 
