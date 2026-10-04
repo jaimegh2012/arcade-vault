@@ -278,6 +278,7 @@ export function createAsteroidsGame(
     resume() {
       if (destroyed || !paused) return;
       paused = false;
+      input.reset(); // descarta pulsaciones hechas durante la pausa
       startLoop(); // lastTime = null → primer dt = 0, sin saltos
     },
 

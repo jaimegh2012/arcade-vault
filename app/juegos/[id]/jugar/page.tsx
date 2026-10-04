@@ -130,11 +130,20 @@ export default function GamePlayerPage(props: PageProps<"/juegos/[id]/jugar">) {
       </div>
 
       {isAsteroids && (
-        <div
-          className="mono"
-          style={{ marginTop: 16, textAlign: "center", fontSize: 11, color: "var(--ink-dim)", letterSpacing: "0.16em" }}
-        >
-          ←→ ROTAR · ↑ PROPULSAR · ESPACIO DISPARAR
+        <div className="controls-hint">
+          <span className="ctl">
+            <kbd>←</kbd>
+            <kbd>→</kbd>
+            rotar
+          </span>
+          <span className="ctl">
+            <kbd>↑</kbd>
+            propulsar
+          </span>
+          <span className="ctl">
+            <kbd>ESPACIO</kbd>
+            disparar
+          </span>
         </div>
       )}
 
