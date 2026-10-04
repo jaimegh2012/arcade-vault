@@ -1,6 +1,6 @@
 # 04 — Integración de Supabase (infraestructura base)
 
-- **Estado:** Approved
+- **Estado:** Implemented
 - **Depende de:** SPEC 01, SPEC 03
 - **Fecha:** 2026-10-03
 
@@ -68,19 +68,19 @@ Convenciones:
 
 ## Criterios de aceptación
 
-- [ ] `package.json` incluye `@supabase/supabase-js` y `@supabase/ssr`.
-- [ ] `.env.local` define `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` con los valores del proyecto `zhxfzcjwvakzvydurxke`.
-- [ ] `.env.example` lista ambas variables sin valores reales y `.env.local` no está versionado.
-- [ ] `lib/supabase/client.ts` y `lib/supabase/server.ts` existen y exportan `createClient`, tipado con `Database`.
-- [ ] `lib/supabase/database.types.ts` existe y fue generado con el MCP de Supabase.
-- [ ] `supabase/migrations/` existe y está versionada con `.gitkeep`.
-- [ ] La comprobación temporal con el cliente de servidor devuelve respuesta sin error de red ni de credenciales.
-- [ ] Tras la verificación no queda ninguna ruta, script o archivo de prueba en el repo.
-- [ ] No existe `proxy.ts` ni código que use Supabase Auth.
-- [ ] No hay ninguna clave `service_role` ni el valor de `SUPABASE_PASSWORD` en el código ni en variables `NEXT_PUBLIC_`.
-- [ ] `get_advisors` (seguridad) no reporta problemas críticos.
-- [ ] Ninguna pantalla existente cambia su comportamiento ni su aspecto.
-- [ ] `npm run lint` y `npm run build` pasan sin errores.
+- [x] `package.json` incluye `@supabase/supabase-js` y `@supabase/ssr`.
+- [x] `.env.local` define `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` con los valores del proyecto `zhxfzcjwvakzvydurxke`.
+- [x] `.env.example` lista ambas variables sin valores reales y `.env.local` no está versionado.
+- [x] `lib/supabase/client.ts` y `lib/supabase/server.ts` existen y exportan `createClient`, tipado con `Database`.
+- [x] `lib/supabase/database.types.ts` existe y fue generado con el MCP de Supabase.
+- [x] `supabase/migrations/` existe y está versionada con `.gitkeep`.
+- [x] La comprobación temporal con el cliente de servidor devuelve respuesta sin error de red ni de credenciales.
+- [x] Tras la verificación no queda ninguna ruta, script o archivo de prueba en el repo.
+- [x] No existe `proxy.ts` ni código que use Supabase Auth.
+- [x] No hay ninguna clave `service_role` ni el valor de `SUPABASE_PASSWORD` en el código ni en variables `NEXT_PUBLIC_`.
+- [x] `get_advisors` (seguridad) no reporta problemas críticos.
+- [x] Ninguna pantalla existente cambia su comportamiento ni su aspecto.
+- [x] `npm run lint` y `npm run build` pasan sin errores.
 
 ## Decisiones tomadas y descartadas
 
