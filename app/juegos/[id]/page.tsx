@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Leaderboard from "@/components/leaderboard";
+import { ScoresEmpty, ScoresError } from "@/components/scores-state";
+import type { GameStats, ScoreRow } from "@/lib/data";
 import { formatBest, formatPlays } from "@/lib/format";
 import { getGame, getGameStats, getTopScores } from "@/lib/games-repo";
 
@@ -9,8 +11,17 @@ export default async function GameDetailPage(props: PageProps<"/juegos/[id]">) {
   const game = await getGame(id);
   if (!game) notFound();
 
-  const [allStats, scores] = await Promise.all([getGameStats(), getTopScores(id, 10)]);
-  const stats = allStats[id] ?? { best: null, plays: 0 };
+  let scores: ScoreRow[] = [];
+  let stats: GameStats = { best: null, plays: 0 };
+  let failed = false;
+  try {
+    const [allStats, top] = await Promise.all([getGameStats(), getTopScores(id, 10)]);
+    scores = top;
+    stats = allStats[id] ?? stats;
+  } catch (err) {
+    console.error("[detalle] Error cargando el ranking:", err);
+    failed = true;
+  }
 
   return (
     <div className="av-detail fade-in">
@@ -63,7 +74,16 @@ export default async function GameDetailPage(props: PageProps<"/juegos/[id]">) {
       </div>
 
       <aside>
-        <Leaderboard title="MEJORES PUNTUACIONES" scores={scores} />
+        {failed ? (
+          <ScoresError compact />
+        ) : scores.length === 0 ? (
+          <div className="leaderboard">
+            <h3>MEJORES PUNTUACIONES</h3>
+            <ScoresEmpty gameId={game.id} compact />
+          </div>
+        ) : (
+          <Leaderboard title="MEJORES PUNTUACIONES" scores={scores} />
+        )}
       </aside>
     </div>
   );
