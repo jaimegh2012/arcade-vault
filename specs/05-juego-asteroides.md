@@ -1,6 +1,6 @@
 # 05 — Juego Asteroides jugable en el reproductor
 
-- **Estado:** Approved
+- **Estado:** Implemented
 - **Depende de:** SPEC 01
 - **Fecha:** 2026-10-03
 
@@ -81,23 +81,23 @@ El nivel mostrado en el HUD pasa a ser el del motor (`level`), no el derivado `s
 
 ## Criterios de aceptación
 
-- [ ] `/juegos/asteroides/jugar` muestra el canvas del juego dentro del marco CRT y la partida arranca sola con 4 asteroides grandes.
-- [ ] `/juegos/rocas` y `/juegos/rocas/jugar` devuelven 404; no queda ninguna referencia a `rocas`/`ROCAS` en `app/`, `lib/` ni `components/`.
-- [ ] La biblioteca, el detalle, el Salón y el home muestran "ASTEROIDES" con su portada (`cover-asteroides`).
-- [ ] `←`/`→` rotan, `↑` propulsa con inercia y `Space` dispara; la página no hace scroll con esas teclas.
-- [ ] Destruir asteroides grande/mediano/pequeño suma 20/50/100 y los grandes y medianos se parten en el tamaño inferior.
-- [ ] El HUD React muestra puntuación, vidas (♥) y nivel del motor en tiempo real; no hay HUD dibujado en el canvas salvo el indicador de disparo triple.
-- [ ] Al destruir todos los asteroides sube el nivel y aparecen más asteroides.
-- [ ] El power-up de disparo triple aparece, se recoge y dispara 3 balas durante su duración, con contador en el canvas.
-- [ ] Al chocar se pierde una vida, la nave reaparece con invencibilidad parpadeante; con 0 vidas se abre el modal "FIN DEL JUEGO" con la puntuación final correcta.
-- [ ] El botón FIN también abre el modal con la puntuación actual.
-- [ ] PAUSA congela asteroides, balas y temporizadores; REANUDAR continúa sin saltos. Cambiar de pestaña pausa la partida.
-- [ ] GUARDAR PUNTUACIÓN escribe en `av_scores` con `game: "asteroides"` y las iniciales indicadas; escribir en el input del modal no dispara ni mueve la nave.
-- [ ] JUGAR DE NUEVO reinicia score 0, 3 vidas y nivel 1 sin duplicar el loop (la velocidad del juego no aumenta tras reiniciar).
-- [ ] Al salir de la página y volver, o con Strict Mode en dev, no hay listeners ni `requestAnimationFrame` duplicados ni errores en consola.
-- [ ] Los demás juegos (`/juegos/<otro>/jugar`) conservan el placeholder simulado sin cambios.
-- [ ] El canvas escala en móvil sin desbordar la pantalla y mantiene proporción 4:3.
-- [ ] `npm run lint` y `npm run build` pasan sin errores.
+- [x] `/juegos/asteroides/jugar` muestra el canvas del juego dentro del marco CRT y la partida arranca sola con 4 asteroides grandes.
+- [x] `/juegos/rocas` y `/juegos/rocas/jugar` devuelven 404; no queda ninguna referencia a `rocas`/`ROCAS` en `app/`, `lib/` ni `components/`.
+- [x] La biblioteca, el detalle, el Salón y el home muestran "ASTEROIDES" con su portada (`cover-asteroides`).
+- [x] `←`/`→` rotan, `↑` propulsa con inercia y `Space` dispara; la página no hace scroll con esas teclas.
+- [x] Destruir asteroides grande/mediano/pequeño suma 20/50/100 y los grandes y medianos se parten en el tamaño inferior.
+- [x] El HUD React muestra puntuación, vidas (♥) y nivel del motor en tiempo real; no hay HUD dibujado en el canvas salvo el indicador de disparo triple.
+- [x] Al destruir todos los asteroides sube el nivel y aparecen más asteroides.
+- [x] El power-up de disparo triple aparece, se recoge y dispara 3 balas durante su duración, con contador en el canvas.
+- [x] Al chocar se pierde una vida, la nave reaparece con invencibilidad parpadeante; con 0 vidas se abre el modal "FIN DEL JUEGO" con la puntuación final correcta.
+- [x] El botón FIN también abre el modal con la puntuación actual.
+- [x] PAUSA congela asteroides, balas y temporizadores; REANUDAR continúa sin saltos. Cambiar de pestaña pausa la partida.
+- [x] GUARDAR PUNTUACIÓN escribe en `av_scores` con `game: "asteroides"` y las iniciales indicadas; escribir en el input del modal no dispara ni mueve la nave.
+- [x] JUGAR DE NUEVO reinicia score 0, 3 vidas y nivel 1 sin duplicar el loop (la velocidad del juego no aumenta tras reiniciar).
+- [x] Al salir de la página y volver, o con Strict Mode en dev, no hay listeners ni `requestAnimationFrame` duplicados ni errores en consola.
+- [x] Los demás juegos (`/juegos/<otro>/jugar`) conservan el placeholder simulado sin cambios.
+- [x] El canvas escala en móvil sin desbordar la pantalla y mantiene proporción 4:3.
+- [x] `npm run lint` y `npm run build` pasan sin errores.
 
 ## Decisiones tomadas y descartadas
 
