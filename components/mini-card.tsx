@@ -9,7 +9,7 @@ export default function MiniCard({ game }: { game: Game }) {
       </div>
       <div className="mini-meta">
         <div className="mini-title">{game.title}</div>
-        <div className="mini-cat">{game.cat}</div>
+        <div className="mini-cat">{game.category}</div>
       </div>
     </Link>
   );

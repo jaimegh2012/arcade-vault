@@ -1315,3 +1315,55 @@ a { color: inherit; text-decoration: none; }
   border-bottom-width: 3px;
   border-radius: 4px;
 }
+
+/* ---------- Estados vacío / error del ranking (SPEC 06) ---------- */
+.score-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 44px 24px;
+  text-align: center;
+  border: 1px dashed var(--ink-faint);
+  background: var(--bg-2);
+}
+.score-state.compact { padding: 32px 18px; border: 0; }
+.score-state .ss-title { font-size: 12px; letter-spacing: 0.14em; color: var(--ink); }
+.score-state .ss-text {
+  margin: 4px 0 10px;
+  max-width: 34ch;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink-dim);
+}
+.score-state.error { border-color: var(--magenta); }
+.score-state.error .ss-title { color: var(--magenta); text-shadow: 0 0 8px rgba(255,0,110,0.5); }
+.score-state .ss-glyph {
+  font-size: 22px;
+  color: var(--magenta);
+  text-shadow: 0 0 10px rgba(255,0,110,0.7);
+}
+/* Ranura de moneda: el único elemento "memorable" del estado vacío */
+.coin-slot {
+  width: 54px;
+  height: 78px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--yellow);
+  background: #05050a;
+  box-shadow: 0 0 14px rgba(245,255,0,0.35), inset 0 0 10px rgba(245,255,0,0.15);
+  margin-bottom: 8px;
+}
+.coin-slot span {
+  width: 6px;
+  height: 34px;
+  background: var(--yellow);
+  box-shadow: 0 0 10px var(--yellow);
+  animation: coin-slot-blink 1.4s steps(2, jump-none) infinite;
+}
+@keyframes coin-slot-blink { 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) { .coin-slot span { animation: none; } }
+.podium-slot.vacant { opacity: 0.45; border-style: dashed; box-shadow: none; }
+.podium-slot.vacant .name { color: var(--ink-faint); }
+.hall-tabs a.chip { text-decoration: none; }
