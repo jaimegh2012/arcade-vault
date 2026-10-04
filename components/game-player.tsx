@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AsteroidsCanvas } from "@/components/asteroids-canvas";
 import type { Game } from "@/lib/data";
-import { saveScore, useUser } from "@/lib/session";
+import { useUser } from "@/lib/session";
+import { submitScore } from "@/app/juegos/[id]/jugar/actions";
 
 export default function GamePlayer({ game }: { game: Game }) {
   const router = useRouter();
@@ -14,15 +15,26 @@ export default function GamePlayer({ game }: { game: Game }) {
   const [lives, setLives] = useState(3);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
-  const [nameOverride, setNameOverride] = useState<string | null>(null);
+  const [initialsOverride, setInitialsOverride] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [engineLevel, setEngineLevel] = useState(1);
   const [restartKey, setRestartKey] = useState(0);
 
   const isAsteroids = game.id === "asteroides";
   // Asteroides usa el nivel del motor; los placeholders lo derivan del score
   const level = isAsteroids ? engineLevel : Math.floor(score / 2500) + 1;
-  const name = nameOverride ?? (user ? user.name : "INVITADO");
+  const name = user ? user.name : "INVITADO";
+  // Iniciales sugeridas a partir del usuario (A-Z0-9, máx. 3); vacío si no hay.
+  const initials =
+    initialsOverride ??
+    (user
+      ? user.name
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, "")
+          .slice(0, 3)
+      : "");
 
   useEffect(() => {
     if (isAsteroids || over || paused) return;
@@ -31,13 +43,29 @@ export default function GamePlayer({ game }: { game: Game }) {
   }, [isAsteroids, over, paused]);
 
   const endGame = () => setOver(true);
+  const save = async () => {
+    if (saving) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const res = await submitScore({ gameId: game.id, name: initials, score });
+      if (res.ok) setSaved(true);
+      else setSaveError(res.error);
+    } catch {
+      setSaveError("Sin conexión. Inténtalo de nuevo.");
+    } finally {
+      setSaving(false);
+    }
+  };
   const restart = () => {
     setScore(0);
     setLives(3);
     setPaused(false);
     setOver(false);
-    setNameOverride(null);
+    setInitialsOverride(null);
     setSaved(false);
+    setSaving(false);
+    setSaveError(null);
     setEngineLevel(1);
     setRestartKey((k) => k + 1);
   };
@@ -155,22 +183,37 @@ export default function GamePlayer({ game }: { game: Game }) {
             <div className="final-label">PUNTUACIÓN FINAL</div>
             <div className="final">{score.toLocaleString("es-ES")}</div>
             {!saved ? (
-              <div className="input-row">
-                <input
-                  value={name}
-                  onChange={(e) => setNameOverride(e.target.value.toUpperCase().slice(0, 10))}
-                  placeholder="TUS INICIALES"
-                />
-                <button
-                  className="btn yellow"
-                  onClick={() => {
-                    saveScore({ game: game.id, score, name });
-                    setSaved(true);
-                  }}
-                >
-                  GUARDAR PUNTUACIÓN
-                </button>
-              </div>
+              <>
+                <div className="input-row">
+                  <input
+                    value={initials}
+                    onChange={(e) =>
+                      setInitialsOverride(
+                        e.target.value
+                          .toUpperCase()
+                          .replace(/[^A-Z0-9]/g, "")
+                          .slice(0, 3),
+                      )
+                    }
+                    maxLength={3}
+                    disabled={saving}
+                    placeholder="TUS INICIALES"
+                    aria-label="Tus iniciales (1 a 3 caracteres)"
+                  />
+                  <button className="btn yellow" onClick={save} disabled={saving}>
+                    {saving ? "GUARDANDO…" : saveError ? "REINTENTAR" : "GUARDAR PUNTUACIÓN"}
+                  </button>
+                </div>
+                {saveError && (
+                  <div
+                    role="alert"
+                    className="mono"
+                    style={{ color: "var(--magenta)", fontSize: 12, marginTop: 10 }}
+                  >
+                    ▸ {saveError}
+                  </div>
+                )}
+              </>
             ) : (
               <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
             )}
