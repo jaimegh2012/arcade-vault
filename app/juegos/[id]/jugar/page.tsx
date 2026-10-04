@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { notFound } from "next/navigation";
+import { AsteroidsCanvas } from "@/components/asteroids-canvas";
 import { GAMES } from "@/lib/data";
 import { saveScore, useUser } from "@/lib/session";
 
@@ -19,15 +20,19 @@ export default function GamePlayerPage(props: PageProps<"/juegos/[id]/jugar">) {
   const [over, setOver] = useState(false);
   const [nameOverride, setNameOverride] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [engineLevel, setEngineLevel] = useState(1);
+  const [restartKey, setRestartKey] = useState(0);
 
-  const level = Math.floor(score / 2500) + 1;
+  const isAsteroids = game.id === "asteroides";
+  // Asteroides usa el nivel del motor; los placeholders lo derivan del score
+  const level = isAsteroids ? engineLevel : Math.floor(score / 2500) + 1;
   const name = nameOverride ?? (user ? user.name : "INVITADO");
 
   useEffect(() => {
-    if (over || paused) return;
+    if (isAsteroids || over || paused) return;
     const t = setInterval(() => setScore((s) => s + Math.floor(10 + Math.random() * 90)), 220);
     return () => clearInterval(t);
-  }, [over, paused]);
+  }, [isAsteroids, over, paused]);
 
   const endGame = () => setOver(true);
   const restart = () => {
@@ -37,6 +42,8 @@ export default function GamePlayerPage(props: PageProps<"/juegos/[id]/jugar">) {
     setOver(false);
     setNameOverride(null);
     setSaved(false);
+    setEngineLevel(1);
+    setRestartKey((k) => k + 1);
   };
 
   return (
@@ -77,13 +84,28 @@ export default function GamePlayerPage(props: PageProps<"/juegos/[id]/jugar">) {
 
       <div className="crt">
         <div className="crt-screen">
-          <div className="game-arena">
-            <div className="grid-floor"></div>
-            <div className="enemy e1"></div>
-            <div className="enemy e2"></div>
-            <div className="enemy e3"></div>
-            <div className="player-ship"></div>
-          </div>
+          {isAsteroids ? (
+            <AsteroidsCanvas
+              paused={paused || over}
+              restartKey={restartKey}
+              onScore={setScore}
+              onLives={setLives}
+              onLevel={setEngineLevel}
+              onGameOver={(finalScore) => {
+                setScore(finalScore);
+                setOver(true);
+              }}
+              onAutoPause={() => setPaused(true)}
+            />
+          ) : (
+            <div className="game-arena">
+              <div className="grid-floor"></div>
+              <div className="enemy e1"></div>
+              <div className="enemy e2"></div>
+              <div className="enemy e3"></div>
+              <div className="player-ship"></div>
+            </div>
+          )}
           {paused && (
             <div className="crt-content" style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}>
               <div>
@@ -106,6 +128,15 @@ export default function GamePlayerPage(props: PageProps<"/juegos/[id]/jugar">) {
           <span>CARGA · 1MB</span>
         </div>
       </div>
+
+      {isAsteroids && (
+        <div
+          className="mono"
+          style={{ marginTop: 16, textAlign: "center", fontSize: 11, color: "var(--ink-dim)", letterSpacing: "0.16em" }}
+        >
+          ←→ ROTAR · ↑ PROPULSAR · ESPACIO DISPARAR
+        </div>
+      )}
 
       {over && (
         <div className="modal-bd">
