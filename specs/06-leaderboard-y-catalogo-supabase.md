@@ -1,6 +1,6 @@
 # 06 — Leaderboard real y tabla de juegos en Supabase
 
-- **Estado:** Approved
+- **Estado:** Implemented
 - **Depende de:** SPEC 01, SPEC 04, SPEC 05
 - **Fecha:** 2026-10-04
 
