@@ -1,6 +1,6 @@
 # 08 — Juego ARKANOID jugable con leaderboard
 
-- **Estado:** Approved
+- **Estado:** Implemented
 - **Depende de:** SPEC 05, SPEC 06, SPEC 07
 - **Fecha:** 2026-10-04
 
