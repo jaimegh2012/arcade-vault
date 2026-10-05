@@ -68,7 +68,7 @@ export default function GamePlayer({ game }: { game: Game }) {
     window.dispatchEvent(new Event("av-muted"));
   };
 
-  // Volumen 0–100 en localStorage (por defecto 70; valor inválido → 70)
+  // Volumen 0–100 en localStorage (por defecto 15; valor inválido → 15)
   const volume = useSyncExternalStore(
     (cb) => {
       window.addEventListener("av-volume", cb);
@@ -78,12 +78,12 @@ export default function GamePlayer({ game }: { game: Game }) {
       try {
         const v = Number(localStorage.getItem("av_volume"));
         const raw = localStorage.getItem("av_volume");
-        return raw !== null && Number.isInteger(v) && v >= 0 && v <= 100 ? v : 70;
+        return raw !== null && Number.isInteger(v) && v >= 0 && v <= 100 ? v : 15;
       } catch {
-        return 70;
+        return 15;
       }
     },
-    () => 70,
+    () => 15,
   );
   const pickVolume = (v: number) => {
     try {
