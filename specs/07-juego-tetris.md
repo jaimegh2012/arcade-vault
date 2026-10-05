@@ -1,6 +1,6 @@
 # 07 — Juego TETRIS jugable con leaderboard
 
-- **Estado:** Approved
+- **Estado:** Implemented
 - **Depende de:** SPEC 05, SPEC 06
 - **Fecha:** 2026-10-04
 
