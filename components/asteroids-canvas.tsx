@@ -1,19 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import {
-  createAsteroidsGame,
-  type AsteroidsCallbacks,
-  type AsteroidsGame,
-} from "@/lib/games/asteroids/engine";
-
-type Props = AsteroidsCallbacks & {
-  paused: boolean;
-  // Al cambiar su valor se reinicia la partida
-  restartKey: number;
-  // El motor se pausó solo (pestaña oculta); la página debe reflejarlo
-  onAutoPause?: () => void;
-};
+import { createAsteroidsGame, type AsteroidsGame } from "@/lib/games/asteroids/engine";
+import type { GameCanvasProps } from "@/lib/games/types";
 
 export function AsteroidsCanvas({
   paused,
@@ -23,7 +12,7 @@ export function AsteroidsCanvas({
   onLevel,
   onGameOver,
   onAutoPause,
-}: Props) {
+}: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<AsteroidsGame | null>(null);
 
@@ -45,8 +34,8 @@ export function AsteroidsCanvas({
 
     const game = createAsteroidsGame(canvas, {
       onScore: (s) => handlers.current.onScore(s),
-      onLives: (l) => handlers.current.onLives(l),
-      onLevel: (l) => handlers.current.onLevel(l),
+      onLives: (l) => handlers.current.onLives?.(l),
+      onLevel: (l) => handlers.current.onLevel?.(l),
       onGameOver: (s) => handlers.current.onGameOver(s),
     });
     gameRef.current = game;

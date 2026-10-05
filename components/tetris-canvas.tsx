@@ -1,16 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { createTetrisGame, type TetrisCallbacks, type TetrisGame } from "@/lib/games/tetris/engine";
+import { createTetrisGame, type TetrisGame } from "@/lib/games/tetris/engine";
 import { H, W } from "@/lib/games/tetris/constants";
-
-type Props = TetrisCallbacks & {
-  paused: boolean;
-  // Al cambiar su valor se reinicia la partida
-  restartKey: number;
-  // El motor se pausó solo (pestaña oculta); la página debe reflejarlo
-  onAutoPause?: () => void;
-};
+import type { GameCanvasProps } from "@/lib/games/types";
 
 export function TetrisCanvas({
   paused,
@@ -21,7 +14,7 @@ export function TetrisCanvas({
   onGameOver,
   onTogglePause,
   onAutoPause,
-}: Props) {
+}: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<TetrisGame | null>(null);
 
@@ -43,10 +36,10 @@ export function TetrisCanvas({
 
     const game = createTetrisGame(canvas, {
       onScore: (s) => handlers.current.onScore(s),
-      onLines: (l) => handlers.current.onLines(l),
-      onLevel: (l) => handlers.current.onLevel(l),
+      onLines: (l) => handlers.current.onLines?.(l),
+      onLevel: (l) => handlers.current.onLevel?.(l),
       onGameOver: (s) => handlers.current.onGameOver(s),
-      onTogglePause: () => handlers.current.onTogglePause(),
+      onTogglePause: () => handlers.current.onTogglePause?.(),
     });
     gameRef.current = game;
     game.start();
