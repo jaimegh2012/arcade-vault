@@ -68,6 +68,30 @@ export default function GamePlayer({ game }: { game: Game }) {
     window.dispatchEvent(new Event("av-muted"));
   };
 
+  // Volumen 0–100 en localStorage (por defecto 70; valor inválido → 70)
+  const volume = useSyncExternalStore(
+    (cb) => {
+      window.addEventListener("av-volume", cb);
+      return () => window.removeEventListener("av-volume", cb);
+    },
+    () => {
+      try {
+        const v = Number(localStorage.getItem("av_volume"));
+        const raw = localStorage.getItem("av_volume");
+        return raw !== null && Number.isInteger(v) && v >= 0 && v <= 100 ? v : 70;
+      } catch {
+        return 70;
+      }
+    },
+    () => 70,
+  );
+  const pickVolume = (v: number) => {
+    try {
+      localStorage.setItem("av_volume", String(v));
+    } catch {}
+    window.dispatchEvent(new Event("av-volume"));
+  };
+
   // Los juegos con motor están en el registro; el resto mantiene el placeholder simulado
   const entry = GAME_REGISTRY[game.id];
   const level = entry?.engineLevel ? engineLevel : Math.floor(score / 2500) + 1;
@@ -186,6 +210,7 @@ export default function GamePlayer({ game }: { game: Game }) {
               onAutoPause={() => setPaused(true)}
               blockStyle={blockStyle}
               muted={muted}
+              volume={volume / 100}
               jumpTo={jumpTo}
             />
           ) : (
@@ -266,6 +291,21 @@ export default function GamePlayer({ game }: { game: Game }) {
             >
               {muted ? "SONIDO OFF" : "SONIDO ON"}
             </button>
+          )}
+          {entry.hasSound && (
+            <label className="volume-ctl" data-muted={muted || undefined}>
+              <input
+                type="range"
+                className="volume-slider"
+                min={0}
+                max={100}
+                step={5}
+                value={volume}
+                aria-label="Volumen"
+                onChange={(e) => pickVolume(Number(e.target.value))}
+              />
+              <span className="volume-value">{volume}%</span>
+            </label>
           )}
         </div>
       )}

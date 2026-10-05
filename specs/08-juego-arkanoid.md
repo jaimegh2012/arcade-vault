@@ -19,7 +19,7 @@
 2. **Assets** en `public/games/arkanoid/`: `spritesheet-breakout.png`, `ball-bounce.mp3`, `break-sound.mp3` (copiados de `references/started-games/04-arkanoid/assets/`; la referencia no se modifica).
 3. **Motor** en `lib/games/arkanoid/`: `constants.ts`, `levels.ts`, `entities.ts`, `sprites.ts`, `input.ts`, `engine.ts`.
    - Sin globals de módulo con estado ni `document.getElementById`; las funciones de dibujo reciben `ctx`. El motor no toca `localStorage` ni el DOM fuera del `canvas` recibido.
-   - API: `createArkanoidGame(canvas, callbacks)` → `{ start, pause, resume, restart, jumpToLevel, setMuted, destroy }`.
+   - API: `createArkanoidGame(canvas, callbacks)` → `{ start, pause, resume, restart, jumpToLevel, setMuted, setVolume, destroy }`.
    - Callbacks: `onScore(score)`, `onLives(lives)`, `onLevel(level)`, `onGameOver(finalScore)`, `onTogglePause()`.
    - Loop `requestAnimationFrame` con `dt` ≤ 50 ms (el original no lo limita; se añade para no saltar al volver de otra pestaña). `destroy()` cancela rAF, quita listeners y aborta una carga de sprites en curso.
    - Mecánica y constantes idénticas al código del original (`game.js` manda sobre el README):
@@ -32,10 +32,10 @@
      - Limpiar los bloques de un nivel carga el siguiente conservando puntuación y vidas; limpiar el nivel 5 es victoria.
    - Se elimina del canvas: el texto `Score` y `Nivel`, el overlay `GAME OVER` / `¡Completaste el juego!` y el overlay de pausa con botones de nivel (los hace React).
    - **Se conserva dibujado en canvas** lo que el HUD React no sustituye: bloques, paleta, pelota, explosiones y las **pelotas de vida** (sprite `ball` 16×16, separación 4 px, alineadas a la derecha en `y = 10`).
-   - **Audio** idéntico al original: `ball-bounce.mp3` en cada rebote (paredes, techo, paleta) y `break-sound.mp3` al romper un bloque, con `cloneNode().play()` y `.catch` del autoplay. No suena en pausa ni tras el fin; `setMuted(true)` silencia sin pausar.
+   - **Audio** idéntico al original: `ball-bounce.mp3` en cada rebote (paredes, techo, paleta) y `break-sound.mp3` al romper un bloque, con `cloneNode().play()` y `.catch` del autoplay. No suena en pausa ni tras el fin; `setMuted(true)` silencia sin pausar; `setVolume(0–1)` ajusta el volumen de los efectos (por defecto 0,7; con 0 no suena).
 4. **Componente cliente** `components/arkanoid-canvas.tsx` (`"use client"`), mismo patrón que `components/tetris-canvas.tsx`: callbacks vía ref, props `paused` y `restartKey`, `onAutoPause` con `visibilitychange`, seguro con Strict Mode. Canvas lógico fijo **800×600** escalado por CSS dentro de `.crt-screen` con el aspecto por defecto `4 / 3`. Props nuevas `muted` y `jumpTo` (ver Modelo de datos).
 5. **Registro y reproductor** — `lib/games/registry.ts` añade la entrada `arkanoid`; `components/game-player.tsx` pasa a leer del registro dos capacidades nuevas:
-   - **Sonido** (`hasSound`): chip `SONIDO ON/OFF` junto al hint de controles (patrón del selector de estilo de Tetris). Preferencia en `localStorage` clave `av_muted` con `try/catch` y `useSyncExternalStore` (snapshot de servidor: sonido activado). Solo aparece en juegos con sonido; asteroides y tetris no cambian.
+   - **Sonido** (`hasSound`): chip `SONIDO ON/OFF` junto al hint de controles (patrón del selector de estilo de Tetris). Preferencia en `localStorage` clave `av_muted` con `try/catch` y `useSyncExternalStore` (**apagado por defecto**: solo el valor `"0"` lo activa; snapshot de servidor y `localStorage` bloqueado: apagado). Junto al chip, un **slider de volumen** 0–100 (paso 5, por defecto 70) con preferencia `av_volume` (valor inválido → 70), atenuado mientras el sonido está apagado. Solo aparece en juegos con sonido; asteroides y tetris no cambian.
    - **Salto de nivel** (`levelJump: 5`): en el overlay de pausa del reproductor, chips `1`–`5` con el nivel actual resaltado. Elegir uno carga ese nivel (bloques nuevos, pelota con la velocidad del nivel) **conservando puntuación y vidas**, y reanuda la partida, como el original.
    - HUD de `arkanoid`: puntuación, **vidas** (`hasLives: true`) y nivel del motor (`engineLevel: true`); sin líneas. Las vidas se ven además como pelotas en el canvas.
 6. **Controles:**
@@ -49,7 +49,7 @@
 **No incluido (fuera de alcance de este spec):**
 
 - Controles táctiles / móvil jugable, pantalla completa, guardado de partida en curso.
-- Mute global del sitio, volumen, música o más sonidos que los dos del original.
+- Mute o volumen global del sitio, música o más sonidos que los dos del original.
 - Power-ups, ángulo de rebote según el impacto, bloques de varios golpes, más de 5 niveles o cualquier mecánica o balance nuevo.
 - Bonus por vidas restantes al ganar.
 - Auth, anti-trampas, rate limit, scores ligados a usuario (incluye impedir farmear puntos saltando de nivel).
@@ -89,6 +89,7 @@ export type ArkanoidGame = {
   restart(): void;
   jumpToLevel(level: number): void; // 1–5; conserva score y vidas
   setMuted(muted: boolean): void;
+  setVolume(volume: number): void; // 0–1
   destroy(): void; // cancela rAF, quita listeners, aborta carga de sprites
 };
 ```
@@ -98,6 +99,7 @@ Ampliación del contrato común y del registro (`lib/games/types.ts`, `lib/games
 ```ts
 // GameCanvasProps — campos opcionales nuevos
 muted?: boolean;
+volume?: number; // 0–1
 // Cambia `seq` para pedir un salto de nivel; el canvas llama a jumpToLevel(level)
 jumpTo?: { level: number; seq: number };
 
@@ -139,9 +141,9 @@ lib/games/arkanoid/engine.ts                           // nuevo: createArkanoidG
 components/arkanoid-canvas.tsx                         // nuevo
 lib/games/types.ts                                     // modificado: muted, jumpTo
 lib/games/registry.ts                                  // modificado: entrada arkanoid, hasSound, levelJump
-components/game-player.tsx                             // modificado: chip SONIDO, chips de salto de nivel en pausa
+components/game-player.tsx                             // modificado: chip SONIDO, slider de volumen, chips de salto de nivel en pausa
 lib/home-data.ts                                       // modificado: "Bloque Buster" → "Arkanoid"
-app/globals.css                                        // modificado: estilos del chip de sonido y chips de nivel
+app/globals.css                                        // modificado: estilos del chip de sonido, slider de volumen, chips de nivel y .crt-fit
 ```
 
 ## Plan de implementación
@@ -154,7 +156,7 @@ app/globals.css                                        // modificado: estilos de
 6. **Motor** — estado en closure, update/draw, callbacks solo en cambios reales, audio con `setMuted`, `pause`/`resume`/`restart`/`jumpToLevel`/`destroy`, `dt` ≤ 50 ms, una sola salida de fin (win y game over llaman a `onGameOver` una vez).
 7. **Componente `ArkanoidCanvas`** — montaje en `useEffect`, Strict Mode, `visibilitychange`, escalado 800×600, props `muted` y `jumpTo`.
 8. **Registro y reproductor (jugable)** — ampliar `GameCanvasProps` y `GameEntry`, añadir la entrada `arkanoid` y los HUD de vidas/nivel; sin chips aún. Verificar partida completa de Arkanoid y que `asteroides` y `tetris` siguen igual.
-9. **Chip de sonido** — `hasSound` en el reproductor con `av_muted` en `localStorage`; pasar `muted` al canvas. Verificar que solo aparece en Arkanoid.
+9. **Chip de sonido** — `hasSound` en el reproductor con `av_muted` y `av_volume` en `localStorage`; pasar `muted` y `volume` al canvas. Verificar que solo aparece en Arkanoid.
 10. **Salto de nivel** — `levelJump` en el overlay de pausa; pasar `jumpTo` al canvas; reanudar tras elegir. Verificar que se conservan score y vidas y que el nivel del HUD cambia.
 11. **Pulido y verificación manual** — con `/frontend-design`; partida completa (mover con teclado y ratón, rebotes, romper bloques, perder vidas, pasar niveles, ganar, perder), guardar iniciales, ver marca en Salón, detalle y card, jugar de nuevo, salir y volver, escritorio y ancho móvil. Capturas en `.playwright-screenshot`.
 12. **Cierre** — `get_advisors`, `npm run lint`, `npm run build`, `git status`; borrar con `execute_sql` las filas de prueba de `scores` con `game_id = 'arkanoid'`.
@@ -173,7 +175,7 @@ app/globals.css                                        // modificado: estilos de
 - [ ] Solo hay explosión de 4 frames de 150 ms por bloque roto, incluido el bloque gris (usa los frames rojos, como el original).
 - [ ] El HUD React muestra puntuación, vidas (3→0) y nivel del motor (01–05) en tiempo real; no muestra líneas; el canvas no dibuja Score, Nivel ni overlays, solo las pelotas de vida.
 - [ ] Suena el rebote en paredes/techo/paleta y el sonido de rotura al romper bloque; no suena en pausa ni tras el fin.
-- [ ] El chip `SONIDO` solo aparece en Arkanoid; al apagarlo no suena nada y la preferencia sobrevive a recargar; con `localStorage` bloqueado el juego funciona sin errores.
+- [ ] El chip `SONIDO` arranca en OFF y solo aparece en Arkanoid; al apagarlo no suena nada y la preferencia sobrevive a recargar; el slider de volumen (0–100, 70 por defecto) cambia el volumen de los efectos, con 0 no suena y su valor persiste tras recargar; con `localStorage` bloqueado el juego funciona sin errores.
 - [ ] PAUSA congela pelota, paleta y explosiones y REANUDAR continúa sin saltos; `P` y `Escape` alternan PAUSA/REANUDAR; cambiar de pestaña pausa. Con el modal abierto `P`/`Escape` no hacen nada.
 - [ ] En pausa aparecen los chips `1`–`5` con el nivel actual resaltado; elegir uno carga ese nivel, conserva puntuación y vidas, actualiza el nivel del HUD y reanuda.
 - [ ] Guardar iniciales válidas crea una fila en `scores` con `game_id: "arkanoid"`; iniciales inválidas se rechazan sin cerrar el modal; escribir en el input del modal no mueve la paleta.
@@ -191,7 +193,7 @@ app/globals.css                                        // modificado: estilos de
 - **Sí:** borrar los `scores` de `bloque-buster` antes del update — son pruebas de un placeholder y la FK no tiene `ON UPDATE CASCADE`. **No:** añadir `ON UPDATE CASCADE` (cambio de esquema fuera de alcance).
 - **Sí:** reutilizar `.cover-bricks`. **No:** crear `.cover-arkanoid`.
 - **Sí:** spritesheet PNG original servido desde `public/games/arkanoid/` — fidelidad con el original. **No:** reemplazarlo por rectángulos neón (cambia el aspecto del juego).
-- **Sí:** incluir los dos sonidos del original, con chip de mute persistido (`av_muted`, prefijo `av_` como `av_block_style_*`). **No:** mute global del sitio ni volumen — spec aparte si se quiere audio en más juegos.
+- **Sí:** incluir los dos sonidos del original, con chip de mute persistido (`av_muted`, prefijo `av_` como `av_block_style_*`). Sonido **apagado por defecto** y slider de volumen local al reproductor (`av_volume`), por decisión del usuario. **No:** mute o volumen global del sitio — spec aparte si se quiere audio en más juegos.
 - **Sí:** mantener el selector de salto de nivel, pero como UI React en el overlay de pausa (chips `1`–`5`) conservando puntuación y vidas, como el original. **No:** botones dibujados en canvas con `click` por coordenadas (rompería la fuente única del estado `paused` en React).
 - **Sí:** el ratón mueve la paleta como en el original. **No:** quitarlo ni usar pointer lock.
 - **Sí:** `P` y `Escape` pausan vía `onTogglePause` hacia el reproductor — una sola fuente de verdad. **No:** pausa interna del motor ni overlay de pausa en canvas.
@@ -202,7 +204,9 @@ app/globals.css                                        // modificado: estilos de
 - **Sí:** motor TypeScript con `createArkanoidGame(canvas, callbacks)` — sin globals, limpieza al desmontar. **No:** `iframe` ni `next/script` con el `game.js` tal cual.
 - **Sí:** tope de `dt` de 50 ms aunque el original no lo tenga — evita que la pelota atraviese bloques al volver a la pestaña. No altera la jugabilidad normal.
 - **Sí:** guardado con `submitScore` existente y `games` como fuente del catálogo. **No:** tablas por juego ni localStorage para scores.
-- **Sí:** campos opcionales `hasSound` y `levelJump` en `GameEntry` y `muted`/`jumpTo` en `GameCanvasProps`. **No:** ramas `if (game.id === "arkanoid")` en `game-player.tsx`.
+- **Sí:** campos opcionales `hasSound` y `levelJump` en `GameEntry` y `muted`/`volume`/`jumpTo` en `GameCanvasProps`. **No:** ramas `if (game.id === "arkanoid")` en `game-player.tsx`.
+
+- **Sí:** limitar el ancho del marco `.crt` de los juegos con motor 4:3 por el alto de la ventana (`.crt-fit`, mismo cálculo que `.crt-tall` de Tetris), también en Asteroides, para que la paleta quede visible sin scroll. **No:** dejar el marco a todo el ancho del contenedor.
 
 ## Riesgos identificados
 
@@ -225,7 +229,7 @@ app/globals.css                                        // modificado: estilos de
 ## Qué **no** está en este spec
 
 - Táctil, pantalla completa, guardado de partida.
-- Mute global, volumen, música y sonidos extra.
+- Mute o volumen global, música y sonidos extra.
 - Power-ups, ángulo de rebote, bloques resistentes, niveles extra y cualquier cambio de mecánica o puntuación.
 - Bonus por vidas al ganar.
 - Auth/anti-trampas y scores ligados a usuario.

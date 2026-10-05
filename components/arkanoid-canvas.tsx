@@ -15,6 +15,7 @@ export function ArkanoidCanvas({
   onTogglePause,
   onAutoPause,
   muted,
+  volume,
   jumpTo,
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -37,6 +38,12 @@ export function ArkanoidCanvas({
     gameRef.current?.setMuted(!!muted);
   }, [muted]);
 
+  const volumeRef = useRef(volume);
+  useEffect(() => {
+    volumeRef.current = volume;
+    if (volume !== undefined) gameRef.current?.setVolume(volume);
+  }, [volume]);
+
   // Montaje: crea el motor y lo destruye al desmontar (Strict Mode safe)
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -51,6 +58,7 @@ export function ArkanoidCanvas({
     });
     gameRef.current = game;
     game.setMuted(mutedRef.current);
+    if (volumeRef.current !== undefined) game.setVolume(volumeRef.current);
     game.start();
     if (pausedRef.current) game.pause();
 

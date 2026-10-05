@@ -1,6 +1,7 @@
 import {
   BOUNCE_SOUND_URL,
   BREAK_SOUND_URL,
+  DEFAULT_VOLUME,
   H,
   INITIAL_LIVES,
   MAX_DT,
@@ -47,6 +48,7 @@ export type ArkanoidGame = {
   restart(): void;
   jumpToLevel(level: number): void; // 1–5; conserva score y vidas
   setMuted(muted: boolean): void;
+  setVolume(volume: number): void; // 0–1
   destroy(): void; // cancela rAF, quita listeners, aborta carga de sprites
 };
 
@@ -62,6 +64,7 @@ export function createArkanoidGame(
   const bounceSound = new Audio(BOUNCE_SOUND_URL);
   const breakSound = new Audio(BREAK_SOUND_URL);
   let muted = false;
+  let volume = DEFAULT_VOLUME;
 
   let sheet: Spritesheet | null = null;
   let keys: ArkanoidKeys = { left: false, right: false };
@@ -103,8 +106,10 @@ export function createArkanoidGame(
   }
 
   function play(base: HTMLAudioElement) {
-    if (muted) return;
-    (base.cloneNode() as HTMLAudioElement).play().catch(() => {});
+    if (muted || volume === 0) return;
+    const a = base.cloneNode() as HTMLAudioElement;
+    a.volume = volume;
+    a.play().catch(() => {});
   }
 
   // ── Lógica ─────────────────────────────────────────────────────────────────
@@ -308,6 +313,10 @@ export function createArkanoidGame(
 
     setMuted(m) {
       muted = m;
+    },
+
+    setVolume(v) {
+      volume = Math.min(Math.max(v, 0), 1);
     },
 
     destroy() {

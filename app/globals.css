@@ -2824,6 +2824,32 @@ a {
   padding: 8px 12px;
 }
 
+/* Volumen junto al chip de sonido */
+.volume-ctl {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.volume-ctl[data-muted] {
+  opacity: 0.5;
+}
+.volume-slider {
+  width: 110px;
+  accent-color: var(--cyan);
+  cursor: pointer;
+}
+.volume-slider:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+}
+.volume-value {
+  min-width: 4ch;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--ink-dim);
+}
+
 /* Salto de nivel en el overlay de pausa */
 .level-jump {
   display: flex;

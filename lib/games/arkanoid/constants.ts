@@ -20,6 +20,7 @@ export const BLOCKS_ORIGIN_Y = 80;
 export const POINTS_PER_BLOCK = 10;
 export const INITIAL_LIVES = 3;
 export const MAX_LEVEL = 5;
+export const DEFAULT_VOLUME = 0.7; // 0–1
 export const MAX_DT = 0.05; // s, tope para no saltar al volver de otra pestaña
 
 // Pelotas de vida dibujadas en el canvas
