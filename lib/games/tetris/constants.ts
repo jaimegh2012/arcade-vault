@@ -70,3 +70,13 @@ export const BASE_DROP_MS = 1000;
 export const MIN_DROP_MS = 100;
 export const DROP_STEP_MS = 90;
 export const GHOST_ALPHA = 0.2;
+
+// Estilos de dibujo de bloque seleccionables desde el reproductor
+export const BLOCK_STYLES = [
+  { id: "bisel", label: "BISEL" },
+  { id: "plano", label: "PLANO" },
+  { id: "neon", label: "NEÓN" },
+  { id: "contorno", label: "CONTORNO" },
+] as const;
+export type BlockStyle = (typeof BLOCK_STYLES)[number]["id"];
+export const DEFAULT_BLOCK_STYLE: BlockStyle = "bisel";

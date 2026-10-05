@@ -9,6 +9,7 @@ import {
   PIECE_TYPES,
   ROWS,
   WALL_KICKS,
+  type BlockStyle,
   type Shape,
 } from "./constants";
 
@@ -103,23 +104,52 @@ export function drawBlock(
   y: number,
   colorIndex: number,
   size: number,
+  style: BlockStyle,
   alpha = 1,
 ): void {
   if (!colorIndex) return;
   const px = x * size + 1;
   const py = y * size + 1;
   const s = size - 2;
+  const color = COLORS[colorIndex];
   const edge = Math.max(2, Math.round(size / 9));
   ctx.globalAlpha = alpha;
-  ctx.fillStyle = COLORS[colorIndex];
-  ctx.fillRect(px, py, s, s);
-  // bisel: luz arriba/izquierda, sombra abajo/derecha
-  ctx.fillStyle = "rgba(255,255,255,0.30)";
-  ctx.fillRect(px, py, s, edge);
-  ctx.fillRect(px, py, edge, s);
-  ctx.fillStyle = "rgba(0,0,0,0.28)";
-  ctx.fillRect(px, py + s - edge, s, edge);
-  ctx.fillRect(px + s - edge, py, edge, s);
+  switch (style) {
+    case "plano":
+      ctx.fillStyle = color;
+      ctx.fillRect(px, py, s, s);
+      break;
+    case "neon":
+      ctx.save();
+      ctx.shadowColor = color;
+      ctx.shadowBlur = size / 2;
+      ctx.fillStyle = color;
+      ctx.globalAlpha = alpha * 0.25;
+      ctx.fillRect(px, py, s, s);
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(px + 1, py + 1, s - 2, s - 2);
+      ctx.restore();
+      break;
+    case "contorno":
+      ctx.fillStyle = "rgba(255,255,255,0.04)";
+      ctx.fillRect(px, py, s, s);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = edge / 1.5;
+      ctx.strokeRect(px + edge / 3, py + edge / 3, s - (2 * edge) / 3, s - (2 * edge) / 3);
+      break;
+    default:
+      ctx.fillStyle = color;
+      ctx.fillRect(px, py, s, s);
+      // bisel: luz arriba/izquierda, sombra abajo/derecha
+      ctx.fillStyle = "rgba(255,255,255,0.30)";
+      ctx.fillRect(px, py, s, edge);
+      ctx.fillRect(px, py, edge, s);
+      ctx.fillStyle = "rgba(0,0,0,0.28)";
+      ctx.fillRect(px, py + s - edge, s, edge);
+      ctx.fillRect(px + s - edge, py, edge, s);
+  }
   ctx.globalAlpha = 1;
 }
 
@@ -140,25 +170,36 @@ export function drawGrid(ctx: CanvasRenderingContext2D): void {
   }
 }
 
-export function drawBoard(ctx: CanvasRenderingContext2D, board: Board): void {
+export function drawBoard(ctx: CanvasRenderingContext2D, board: Board, style: BlockStyle): void {
   for (let r = 0; r < ROWS; r++)
-    for (let c = 0; c < COLS; c++) drawBlock(ctx, c, r, board[r][c], BLOCK);
+    for (let c = 0; c < COLS; c++) drawBlock(ctx, c, r, board[r][c], BLOCK, style);
 }
 
-export function drawPiece(ctx: CanvasRenderingContext2D, piece: Piece, y: number, alpha = 1): void {
+export function drawPiece(
+  ctx: CanvasRenderingContext2D,
+  piece: Piece,
+  y: number,
+  style: BlockStyle,
+  alpha = 1,
+): void {
   for (let r = 0; r < piece.shape.length; r++)
     for (let c = 0; c < piece.shape[r].length; c++)
-      drawBlock(ctx, piece.x + c, y + r, piece.shape[r][c], BLOCK, alpha);
+      drawBlock(ctx, piece.x + c, y + r, piece.shape[r][c], BLOCK, style, alpha);
 }
 
-export function drawGhost(ctx: CanvasRenderingContext2D, board: Board, piece: Piece): void {
-  drawPiece(ctx, piece, ghostY(board, piece), GHOST_ALPHA);
+export function drawGhost(
+  ctx: CanvasRenderingContext2D,
+  board: Board,
+  piece: Piece,
+  style: BlockStyle,
+): void {
+  drawPiece(ctx, piece, ghostY(board, piece), style, GHOST_ALPHA);
 }
 
 // Panel NEXT: a la derecha del tablero, pieza centrada en una caja de 4×4 bloques reducidos.
 const NEXT_BLOCK = 22;
 
-export function drawNext(ctx: CanvasRenderingContext2D, next: Piece): void {
+export function drawNext(ctx: CanvasRenderingContext2D, next: Piece, style: BlockStyle): void {
   const panelW = ctx.canvas.width - BOARD_W;
   const box = 4 * NEXT_BLOCK;
   const left = BOARD_W + (panelW - box) / 2;
@@ -187,6 +228,6 @@ export function drawNext(ctx: CanvasRenderingContext2D, next: Piece): void {
   ctx.translate(left, top);
   for (let r = 0; r < shape.length; r++)
     for (let c = 0; c < shape[r].length; c++)
-      drawBlock(ctx, offX + c, offY + r, shape[r][c], NEXT_BLOCK);
+      drawBlock(ctx, offX + c, offY + r, shape[r][c], NEXT_BLOCK, style);
   ctx.restore();
 }

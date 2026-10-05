@@ -1,5 +1,6 @@
 import {
   BASE_DROP_MS,
+  DEFAULT_BLOCK_STYLE,
   DROP_STEP_MS,
   H,
   LINES_PER_LEVEL,
@@ -7,6 +8,7 @@ import {
   MAX_DT,
   MIN_DROP_MS,
   W,
+  type BlockStyle,
 } from "./constants";
 import {
   clearLines,
@@ -39,6 +41,7 @@ export type TetrisGame = {
   pause(): void;
   resume(): void;
   restart(): void;
+  setBlockStyle(style: BlockStyle): void; // redibuja aunque esté en pausa
   destroy(): void; // cancela rAF y quita listeners
 };
 
@@ -68,6 +71,7 @@ export function createTetrisGame(
   let lastTime: number | null = null;
   let paused = false;
   let destroyed = false;
+  let blockStyle: BlockStyle = DEFAULT_BLOCK_STYLE;
 
   // ── Setters que emiten solo en cambios reales ──────────────────────────────
   function setScore(v: number) {
@@ -185,10 +189,10 @@ export function createTetrisGame(
     c.fillStyle = "#05050c";
     c.fillRect(0, 0, W, H);
     drawGrid(c);
-    drawBoard(c, board);
-    drawGhost(c, board, current);
-    drawPiece(c, current, current.y);
-    drawNext(c, next);
+    drawBoard(c, board, blockStyle);
+    drawGhost(c, board, current, blockStyle);
+    drawPiece(c, current, current.y, blockStyle);
+    drawNext(c, next, blockStyle);
   }
 
   // ── Loop ───────────────────────────────────────────────────────────────────
@@ -244,6 +248,12 @@ export function createTetrisGame(
       initGame();
       draw(ctx);
       startLoop();
+    },
+
+    setBlockStyle(style) {
+      if (destroyed || style === blockStyle) return;
+      blockStyle = style;
+      if (detachInput && !gameOver) draw(ctx);
     },
 
     destroy() {

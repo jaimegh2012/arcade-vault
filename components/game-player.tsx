@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import type { Game } from "@/lib/data";
 import { GAME_REGISTRY } from "@/lib/games/registry";
@@ -22,6 +22,28 @@ export default function GamePlayer({ game }: { game: Game }) {
   const [lines, setLines] = useState(0);
   const [engineLevel, setEngineLevel] = useState(1);
   const [restartKey, setRestartKey] = useState(0);
+  // Preferencia de estilo de bloques en localStorage (snapshot de servidor: "bisel")
+  const styleKey = `av_block_style_${game.id}`;
+  const blockStyle = useSyncExternalStore(
+    (cb) => {
+      window.addEventListener("av-block-style", cb);
+      return () => window.removeEventListener("av-block-style", cb);
+    },
+    () => {
+      try {
+        return localStorage.getItem(styleKey) ?? "bisel";
+      } catch {
+        return "bisel";
+      }
+    },
+    () => "bisel",
+  );
+  const pickBlockStyle = (id: string) => {
+    try {
+      localStorage.setItem(styleKey, id);
+    } catch {}
+    window.dispatchEvent(new Event("av-block-style"));
+  };
 
   // Los juegos con motor están en el registro; el resto mantiene el placeholder simulado
   const entry = GAME_REGISTRY[game.id];
@@ -136,6 +158,7 @@ export default function GamePlayer({ game }: { game: Game }) {
                 setOver(true);
               }}
               onAutoPause={() => setPaused(true)}
+              blockStyle={blockStyle}
             />
           ) : (
             <div className="game-arena">
@@ -183,6 +206,23 @@ export default function GamePlayer({ game }: { game: Game }) {
               ))}
               {c.label}
             </span>
+          ))}
+        </div>
+      )}
+
+      {entry?.blockStyles && (
+        <div className="block-styles" role="group" aria-label="Estilo de bloques">
+          <span className="label">BLOQUES</span>
+          {entry.blockStyles.map((b) => (
+            <button
+              key={b.id}
+              type="button"
+              className={`chip${blockStyle === b.id ? " active" : ""}`}
+              aria-pressed={blockStyle === b.id}
+              onClick={() => pickBlockStyle(b.id)}
+            >
+              {b.label}
+            </button>
           ))}
         </div>
       )}

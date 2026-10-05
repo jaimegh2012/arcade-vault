@@ -12,4 +12,6 @@ export type GameCanvasProps = {
   onTogglePause?: () => void;
   // El motor se pausó solo (pestaña oculta); la página debe reflejarlo
   onAutoPause?: () => void;
+  // Estilo de dibujo de bloques (juegos con `blockStyles` en el registro)
+  blockStyle?: string;
 };

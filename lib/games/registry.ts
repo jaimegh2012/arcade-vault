@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import { AsteroidsCanvas } from "@/components/asteroids-canvas";
 import { TetrisCanvas } from "@/components/tetris-canvas";
+import { BLOCK_STYLES } from "./tetris/constants";
 import type { GameCanvasProps } from "./types";
 
 export type GameEntry = {
@@ -9,6 +10,7 @@ export type GameEntry = {
   engineLevel: boolean; // true: el nivel viene del motor
   hasLives: boolean; // false: el HUD oculta VIDAS
   hasLines?: boolean; // true: el HUD añade LÍNEAS
+  blockStyles?: readonly { id: string; label: string }[]; // selector de estilo de bloque
   aspect?: string; // aspect-ratio de .crt-screen; por defecto 4 / 3
 };
 
@@ -36,6 +38,7 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     engineLevel: true,
     hasLives: false,
     hasLines: true,
+    blockStyles: BLOCK_STYLES,
     aspect: "7 / 10",
   },
 };

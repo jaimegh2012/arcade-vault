@@ -2811,6 +2811,26 @@ a {
   border-radius: 4px;
 }
 
+/* Selector de estilo de bloques bajo el CRT */
+.block-styles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+.block-styles .label {
+  margin-right: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ink-dim);
+}
+.block-styles .chip {
+  padding: 8px 12px;
+}
+
 /* ---------- Estados vacío / error del ranking (SPEC 06) ---------- */
 .score-state {
   display: flex;
