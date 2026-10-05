@@ -46,7 +46,7 @@ export default function GamePlayer({ game }: { game: Game }) {
     window.dispatchEvent(new Event("av-block-style"));
   };
 
-  // Preferencia de sonido en localStorage (snapshot de servidor: sonido activado)
+  // Preferencia de sonido en localStorage; apagado por defecto (solo "0" lo activa)
   const muted = useSyncExternalStore(
     (cb) => {
       window.addEventListener("av-muted", cb);
@@ -54,12 +54,12 @@ export default function GamePlayer({ game }: { game: Game }) {
     },
     () => {
       try {
-        return localStorage.getItem("av_muted") === "1";
+        return localStorage.getItem("av_muted") !== "0";
       } catch {
-        return false;
+        return true;
       }
     },
-    () => false,
+    () => true,
   );
   const toggleMuted = () => {
     try {
