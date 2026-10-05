@@ -14,4 +14,10 @@ export type GameCanvasProps = {
   onAutoPause?: () => void;
   // Estilo de dibujo de bloques (juegos con `blockStyles` en el registro)
   blockStyle?: string;
+  // Silencia los efectos de sonido sin pausar (juegos con `hasSound` en el registro)
+  muted?: boolean;
+  // Volumen de los efectos, 0–1 (juegos con `hasSound` en el registro)
+  volume?: number;
+  // Cambia `seq` para pedir un salto de nivel; el canvas llama a jumpToLevel(level)
+  jumpTo?: { level: number; seq: number };
 };

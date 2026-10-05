@@ -1013,8 +1013,17 @@ a {
   max-width: clamp(300px, calc((100svh - 330px) * 0.7 + 48px), 460px);
   margin-inline: auto;
 }
-.crt-tall .crt-bottom { justify-content: center; }
-.crt-tall .crt-bottom span:not(.led) { display: none; }
+/* Juegos 4:3 con motor: el marco entero cabe en pantalla */
+.crt-fit {
+  max-width: clamp(320px, calc((100svh - 330px) * 4 / 3 + 48px), 100%);
+  margin-inline: auto;
+}
+.crt-tall .crt-bottom {
+  justify-content: center;
+}
+.crt-tall .crt-bottom span:not(.led) {
+  display: none;
+}
 .crt::before {
   content: "";
   position: absolute;
@@ -2809,6 +2818,59 @@ a {
   border: 1px solid var(--line);
   border-bottom-width: 3px;
   border-radius: 4px;
+}
+
+.controls-hint .sound-chip {
+  padding: 8px 12px;
+}
+
+/* Volumen junto al chip de sonido */
+.volume-ctl {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.volume-ctl[data-muted] {
+  opacity: 0.5;
+}
+.volume-slider {
+  width: 110px;
+  accent-color: var(--cyan);
+  cursor: pointer;
+}
+.volume-slider:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+}
+.volume-value {
+  min-width: 4ch;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--ink-dim);
+}
+
+/* Salto de nivel en el overlay de pausa */
+.level-jump {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+}
+.level-jump .label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ink-dim);
+}
+.level-jump-chips {
+  display: flex;
+  gap: 8px;
+}
+.level-jump .chip {
+  min-width: 40px;
+  padding: 8px 12px;
 }
 
 /* Selector de estilo de bloques bajo el CRT */

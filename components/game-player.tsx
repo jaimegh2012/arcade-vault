@@ -22,6 +22,7 @@ export default function GamePlayer({ game }: { game: Game }) {
   const [lines, setLines] = useState(0);
   const [engineLevel, setEngineLevel] = useState(1);
   const [restartKey, setRestartKey] = useState(0);
+  const [jumpTo, setJumpTo] = useState<{ level: number; seq: number }>();
   // Preferencia de estilo de bloques en localStorage (snapshot de servidor: "bisel")
   const styleKey = `av_block_style_${game.id}`;
   const blockStyle = useSyncExternalStore(
@@ -43,6 +44,52 @@ export default function GamePlayer({ game }: { game: Game }) {
       localStorage.setItem(styleKey, id);
     } catch {}
     window.dispatchEvent(new Event("av-block-style"));
+  };
+
+  // Preferencia de sonido en localStorage; apagado por defecto (solo "0" lo activa)
+  const muted = useSyncExternalStore(
+    (cb) => {
+      window.addEventListener("av-muted", cb);
+      return () => window.removeEventListener("av-muted", cb);
+    },
+    () => {
+      try {
+        return localStorage.getItem("av_muted") !== "0";
+      } catch {
+        return true;
+      }
+    },
+    () => true,
+  );
+  const toggleMuted = () => {
+    try {
+      localStorage.setItem("av_muted", muted ? "0" : "1");
+    } catch {}
+    window.dispatchEvent(new Event("av-muted"));
+  };
+
+  // Volumen 0–100 en localStorage (por defecto 15; valor inválido → 15)
+  const volume = useSyncExternalStore(
+    (cb) => {
+      window.addEventListener("av-volume", cb);
+      return () => window.removeEventListener("av-volume", cb);
+    },
+    () => {
+      try {
+        const v = Number(localStorage.getItem("av_volume"));
+        const raw = localStorage.getItem("av_volume");
+        return raw !== null && Number.isInteger(v) && v >= 0 && v <= 100 ? v : 15;
+      } catch {
+        return 15;
+      }
+    },
+    () => 15,
+  );
+  const pickVolume = (v: number) => {
+    try {
+      localStorage.setItem("av_volume", String(v));
+    } catch {}
+    window.dispatchEvent(new Event("av-volume"));
   };
 
   // Los juegos con motor están en el registro; el resto mantiene el placeholder simulado
@@ -139,8 +186,11 @@ export default function GamePlayer({ game }: { game: Game }) {
         </div>
       </div>
 
-      <div className={entry?.aspect ? "crt crt-tall" : "crt"}>
-        <div className="crt-screen" style={entry?.aspect ? { aspectRatio: entry.aspect } : undefined}>
+      <div className={entry?.aspect ? "crt crt-tall" : entry ? "crt crt-fit" : "crt"}>
+        <div
+          className="crt-screen"
+          style={entry?.aspect ? { aspectRatio: entry.aspect } : undefined}
+        >
           {entry ? (
             <entry.Canvas
               paused={paused || over}
@@ -159,6 +209,9 @@ export default function GamePlayer({ game }: { game: Game }) {
               }}
               onAutoPause={() => setPaused(true)}
               blockStyle={blockStyle}
+              muted={muted}
+              volume={volume / 100}
+              jumpTo={jumpTo}
             />
           ) : (
             <div className="game-arena">
@@ -186,6 +239,27 @@ export default function GamePlayer({ game }: { game: Game }) {
                 >
                   PULSA REANUDAR PARA CONTINUAR
                 </div>
+                {entry?.levelJump && (
+                  <div className="level-jump" role="group" aria-label="Saltar al nivel">
+                    <span className="label">SALTAR AL NIVEL</span>
+                    <div className="level-jump-chips">
+                      {Array.from({ length: entry.levelJump }, (_, i) => i + 1).map((n) => (
+                        <button
+                          key={n}
+                          type="button"
+                          className={`chip${engineLevel === n ? " active" : ""}`}
+                          aria-pressed={engineLevel === n}
+                          onClick={() => {
+                            setJumpTo((j) => ({ level: n, seq: (j?.seq ?? 0) + 1 }));
+                            setPaused(false);
+                          }}
+                        >
+                          {n}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -200,13 +274,39 @@ export default function GamePlayer({ game }: { game: Game }) {
       {entry && (
         <div className="controls-hint">
           {entry.controls.map((c) => (
-            <span className="ctl" key={c.label}>
+            <span className="ctl" key={`${c.keys.join("")}-${c.label}`}>
               {c.keys.map((k) => (
                 <kbd key={k}>{k}</kbd>
               ))}
               {c.label}
             </span>
           ))}
+          {entry.hasSound && (
+            <button
+              type="button"
+              className={`chip sound-chip${muted ? "" : " active"}`}
+              aria-pressed={!muted}
+              aria-label="Sonido"
+              onClick={toggleMuted}
+            >
+              {muted ? "SONIDO OFF" : "SONIDO ON"}
+            </button>
+          )}
+          {entry.hasSound && (
+            <label className="volume-ctl" data-muted={muted || undefined}>
+              <input
+                type="range"
+                className="volume-slider"
+                min={0}
+                max={100}
+                step={5}
+                value={volume}
+                aria-label="Volumen"
+                onChange={(e) => pickVolume(Number(e.target.value))}
+              />
+              <span className="volume-value">{volume}%</span>
+            </label>
+          )}
         </div>
       )}
 

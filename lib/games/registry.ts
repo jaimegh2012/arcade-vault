@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import { ArkanoidCanvas } from "@/components/arkanoid-canvas";
 import { AsteroidsCanvas } from "@/components/asteroids-canvas";
 import { TetrisCanvas } from "@/components/tetris-canvas";
 import { BLOCK_STYLES } from "./tetris/constants";
@@ -12,6 +13,8 @@ export type GameEntry = {
   hasLines?: boolean; // true: el HUD añade LÍNEAS
   blockStyles?: readonly { id: string; label: string }[]; // selector de estilo de bloque
   aspect?: string; // aspect-ratio de .crt-screen; por defecto 4 / 3
+  hasSound?: boolean; // true: el reproductor muestra el chip SONIDO
+  levelJump?: number; // n: el overlay de pausa muestra chips 1..n
 };
 
 // Juegos con motor real. Los ids sin entrada mantienen el placeholder simulado.
@@ -40,5 +43,17 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     hasLines: true,
     blockStyles: BLOCK_STYLES,
     aspect: "7 / 10",
+  },
+  arkanoid: {
+    Canvas: ArkanoidCanvas,
+    controls: [
+      { keys: ["←", "→"], label: "mover" },
+      { keys: ["RATÓN"], label: "mover" },
+      { keys: ["P"], label: "pausa" },
+    ],
+    engineLevel: true,
+    hasLives: true,
+    hasSound: true,
+    levelJump: 5,
   },
 };
