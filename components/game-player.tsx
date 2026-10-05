@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { AsteroidsCanvas } from "@/components/asteroids-canvas";
 import type { Game } from "@/lib/data";
+import { GAME_REGISTRY } from "@/lib/games/registry";
 import { useUser } from "@/lib/session";
 import { submitScore } from "@/app/juegos/[id]/jugar/actions";
 
@@ -19,12 +19,36 @@ export default function GamePlayer({ game }: { game: Game }) {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [lines, setLines] = useState(0);
   const [engineLevel, setEngineLevel] = useState(1);
   const [restartKey, setRestartKey] = useState(0);
+  // Preferencia de estilo de bloques en localStorage (snapshot de servidor: "bisel")
+  const styleKey = `av_block_style_${game.id}`;
+  const blockStyle = useSyncExternalStore(
+    (cb) => {
+      window.addEventListener("av-block-style", cb);
+      return () => window.removeEventListener("av-block-style", cb);
+    },
+    () => {
+      try {
+        return localStorage.getItem(styleKey) ?? "bisel";
+      } catch {
+        return "bisel";
+      }
+    },
+    () => "bisel",
+  );
+  const pickBlockStyle = (id: string) => {
+    try {
+      localStorage.setItem(styleKey, id);
+    } catch {}
+    window.dispatchEvent(new Event("av-block-style"));
+  };
 
-  const isAsteroids = game.id === "asteroides";
-  // Asteroides usa el nivel del motor; los placeholders lo derivan del score
-  const level = isAsteroids ? engineLevel : Math.floor(score / 2500) + 1;
+  // Los juegos con motor están en el registro; el resto mantiene el placeholder simulado
+  const entry = GAME_REGISTRY[game.id];
+  const level = entry?.engineLevel ? engineLevel : Math.floor(score / 2500) + 1;
+  const showLives = entry ? entry.hasLives : true;
   const name = user ? user.name : "INVITADO";
   // Iniciales sugeridas a partir del usuario (A-Z0-9, máx. 3); vacío si no hay.
   const initials =
@@ -37,10 +61,10 @@ export default function GamePlayer({ game }: { game: Game }) {
       : "");
 
   useEffect(() => {
-    if (isAsteroids || over || paused) return;
+    if (entry || over || paused) return;
     const t = setInterval(() => setScore((s) => s + Math.floor(10 + Math.random() * 90)), 220);
     return () => clearInterval(t);
-  }, [isAsteroids, over, paused]);
+  }, [entry, over, paused]);
 
   const endGame = () => setOver(true);
   const save = async () => {
@@ -60,6 +84,7 @@ export default function GamePlayer({ game }: { game: Game }) {
   const restart = () => {
     setScore(0);
     setLives(3);
+    setLines(0);
     setPaused(false);
     setOver(false);
     setInitialsOverride(null);
@@ -84,10 +109,18 @@ export default function GamePlayer({ game }: { game: Game }) {
             <div className="l">Puntuación</div>
             <div className="v">{score.toLocaleString("es-ES")}</div>
           </div>
-          <div className="hud-stat lives">
-            <div className="l">Vidas</div>
-            <div className="v">{"♥ ".repeat(lives).trim() || "—"}</div>
-          </div>
+          {entry?.hasLines && (
+            <div className="hud-stat">
+              <div className="l">Líneas</div>
+              <div className="v">{lines.toLocaleString("es-ES")}</div>
+            </div>
+          )}
+          {showLives && (
+            <div className="hud-stat lives">
+              <div className="l">Vidas</div>
+              <div className="v">{"♥ ".repeat(lives).trim() || "—"}</div>
+            </div>
+          )}
           <div className="hud-stat level">
             <div className="l">Nivel</div>
             <div className="v">{String(level).padStart(2, "0")}</div>
@@ -106,20 +139,26 @@ export default function GamePlayer({ game }: { game: Game }) {
         </div>
       </div>
 
-      <div className="crt">
-        <div className="crt-screen">
-          {isAsteroids ? (
-            <AsteroidsCanvas
+      <div className={entry?.aspect ? "crt crt-tall" : "crt"}>
+        <div className="crt-screen" style={entry?.aspect ? { aspectRatio: entry.aspect } : undefined}>
+          {entry ? (
+            <entry.Canvas
               paused={paused || over}
               restartKey={restartKey}
               onScore={setScore}
               onLives={setLives}
+              onLines={setLines}
               onLevel={setEngineLevel}
+              // Con el modal de fin abierto, P no hace nada
+              onTogglePause={() => {
+                if (!over) setPaused((p) => !p);
+              }}
               onGameOver={(finalScore) => {
                 setScore(finalScore);
                 setOver(true);
               }}
               onAutoPause={() => setPaused(true)}
+              blockStyle={blockStyle}
             />
           ) : (
             <div className="game-arena">
@@ -158,21 +197,33 @@ export default function GamePlayer({ game }: { game: Game }) {
         </div>
       </div>
 
-      {isAsteroids && (
+      {entry && (
         <div className="controls-hint">
-          <span className="ctl">
-            <kbd>←</kbd>
-            <kbd>→</kbd>
-            rotar
-          </span>
-          <span className="ctl">
-            <kbd>↑</kbd>
-            propulsar
-          </span>
-          <span className="ctl">
-            <kbd>ESPACIO</kbd>
-            disparar
-          </span>
+          {entry.controls.map((c) => (
+            <span className="ctl" key={c.label}>
+              {c.keys.map((k) => (
+                <kbd key={k}>{k}</kbd>
+              ))}
+              {c.label}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {entry?.blockStyles && (
+        <div className="block-styles" role="group" aria-label="Estilo de bloques">
+          <span className="label">BLOQUES</span>
+          {entry.blockStyles.map((b) => (
+            <button
+              key={b.id}
+              type="button"
+              className={`chip${blockStyle === b.id ? " active" : ""}`}
+              aria-pressed={blockStyle === b.id}
+              onClick={() => pickBlockStyle(b.id)}
+            >
+              {b.label}
+            </button>
+          ))}
         </div>
       )}
 

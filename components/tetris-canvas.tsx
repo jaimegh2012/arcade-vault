@@ -1,25 +1,28 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { createAsteroidsGame, type AsteroidsGame } from "@/lib/games/asteroids/engine";
+import { createTetrisGame, type TetrisGame } from "@/lib/games/tetris/engine";
+import { BLOCK_STYLES, DEFAULT_BLOCK_STYLE, H, W, type BlockStyle } from "@/lib/games/tetris/constants";
 import type { GameCanvasProps } from "@/lib/games/types";
 
-export function AsteroidsCanvas({
+export function TetrisCanvas({
   paused,
   restartKey,
   onScore,
-  onLives,
+  onLines,
   onLevel,
   onGameOver,
+  onTogglePause,
   onAutoPause,
+  blockStyle,
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const gameRef = useRef<AsteroidsGame | null>(null);
+  const gameRef = useRef<TetrisGame | null>(null);
 
   // Siempre los callbacks más recientes, sin recrear el motor
-  const handlers = useRef({ onScore, onLives, onLevel, onGameOver, onAutoPause });
+  const handlers = useRef({ onScore, onLines, onLevel, onGameOver, onTogglePause, onAutoPause });
   useEffect(() => {
-    handlers.current = { onScore, onLives, onLevel, onGameOver, onAutoPause };
+    handlers.current = { onScore, onLines, onLevel, onGameOver, onTogglePause, onAutoPause };
   });
 
   const pausedRef = useRef(paused);
@@ -27,18 +30,28 @@ export function AsteroidsCanvas({
     pausedRef.current = paused;
   }, [paused]);
 
+  const style: BlockStyle =
+    BLOCK_STYLES.find((b) => b.id === blockStyle)?.id ?? DEFAULT_BLOCK_STYLE;
+  const styleRef = useRef(style);
+  useEffect(() => {
+    styleRef.current = style;
+    gameRef.current?.setBlockStyle(style);
+  }, [style]);
+
   // Montaje: crea el motor y lo destruye al desmontar (Strict Mode safe)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const game = createAsteroidsGame(canvas, {
+    const game = createTetrisGame(canvas, {
       onScore: (s) => handlers.current.onScore(s),
-      onLives: (l) => handlers.current.onLives?.(l),
+      onLines: (l) => handlers.current.onLines?.(l),
       onLevel: (l) => handlers.current.onLevel?.(l),
       onGameOver: (s) => handlers.current.onGameOver(s),
+      onTogglePause: () => handlers.current.onTogglePause?.(),
     });
     gameRef.current = game;
+    game.setBlockStyle(styleRef.current);
     game.start();
     if (pausedRef.current) game.pause();
 
@@ -74,10 +87,10 @@ export function AsteroidsCanvas({
   return (
     <canvas
       ref={canvasRef}
-      width={800}
-      height={600}
+      width={W}
+      height={H}
       role="img"
-      aria-label="Juego Asteroides"
+      aria-label="Juego Tetris"
       className="absolute inset-0 block h-full w-full"
     />
   );
