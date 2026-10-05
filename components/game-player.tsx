@@ -45,6 +45,28 @@ export default function GamePlayer({ game }: { game: Game }) {
     window.dispatchEvent(new Event("av-block-style"));
   };
 
+  // Preferencia de sonido en localStorage (snapshot de servidor: sonido activado)
+  const muted = useSyncExternalStore(
+    (cb) => {
+      window.addEventListener("av-muted", cb);
+      return () => window.removeEventListener("av-muted", cb);
+    },
+    () => {
+      try {
+        return localStorage.getItem("av_muted") === "1";
+      } catch {
+        return false;
+      }
+    },
+    () => false,
+  );
+  const toggleMuted = () => {
+    try {
+      localStorage.setItem("av_muted", muted ? "0" : "1");
+    } catch {}
+    window.dispatchEvent(new Event("av-muted"));
+  };
+
   // Los juegos con motor están en el registro; el resto mantiene el placeholder simulado
   const entry = GAME_REGISTRY[game.id];
   const level = entry?.engineLevel ? engineLevel : Math.floor(score / 2500) + 1;
@@ -162,6 +184,7 @@ export default function GamePlayer({ game }: { game: Game }) {
               }}
               onAutoPause={() => setPaused(true)}
               blockStyle={blockStyle}
+              muted={muted}
             />
           ) : (
             <div className="game-arena">
@@ -210,6 +233,17 @@ export default function GamePlayer({ game }: { game: Game }) {
               {c.label}
             </span>
           ))}
+          {entry.hasSound && (
+            <button
+              type="button"
+              className={`chip sound-chip${muted ? "" : " active"}`}
+              aria-pressed={!muted}
+              aria-label="Sonido"
+              onClick={toggleMuted}
+            >
+              {muted ? "SONIDO OFF" : "SONIDO ON"}
+            </button>
+          )}
         </div>
       )}
 
