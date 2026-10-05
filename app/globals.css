@@ -2819,6 +2819,29 @@ a {
   padding: 8px 12px;
 }
 
+/* Salto de nivel en el overlay de pausa */
+.level-jump {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+}
+.level-jump .label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ink-dim);
+}
+.level-jump-chips {
+  display: flex;
+  gap: 8px;
+}
+.level-jump .chip {
+  min-width: 40px;
+  padding: 8px 12px;
+}
+
 /* Selector de estilo de bloques bajo el CRT */
 .block-styles {
   display: flex;

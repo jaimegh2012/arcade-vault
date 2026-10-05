@@ -22,6 +22,7 @@ export default function GamePlayer({ game }: { game: Game }) {
   const [lines, setLines] = useState(0);
   const [engineLevel, setEngineLevel] = useState(1);
   const [restartKey, setRestartKey] = useState(0);
+  const [jumpTo, setJumpTo] = useState<{ level: number; seq: number }>();
   // Preferencia de estilo de bloques en localStorage (snapshot de servidor: "bisel")
   const styleKey = `av_block_style_${game.id}`;
   const blockStyle = useSyncExternalStore(
@@ -185,6 +186,7 @@ export default function GamePlayer({ game }: { game: Game }) {
               onAutoPause={() => setPaused(true)}
               blockStyle={blockStyle}
               muted={muted}
+              jumpTo={jumpTo}
             />
           ) : (
             <div className="game-arena">
@@ -212,6 +214,27 @@ export default function GamePlayer({ game }: { game: Game }) {
                 >
                   PULSA REANUDAR PARA CONTINUAR
                 </div>
+                {entry?.levelJump && (
+                  <div className="level-jump" role="group" aria-label="Saltar al nivel">
+                    <span className="label">SALTAR AL NIVEL</span>
+                    <div className="level-jump-chips">
+                      {Array.from({ length: entry.levelJump }, (_, i) => i + 1).map((n) => (
+                        <button
+                          key={n}
+                          type="button"
+                          className={`chip${engineLevel === n ? " active" : ""}`}
+                          aria-pressed={engineLevel === n}
+                          onClick={() => {
+                            setJumpTo((j) => ({ level: n, seq: (j?.seq ?? 0) + 1 }));
+                            setPaused(false);
+                          }}
+                        >
+                          {n}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
