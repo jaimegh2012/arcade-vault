@@ -49,7 +49,7 @@ export const RECENT_SCORES: RecentScore[] = [
   { player: "PX_KAI", game: "Glotón", score: 96400, when: "hace 5 min", tone: "yellow" },
   { player: "Z3R0COOL", game: "Invasores", score: 54190, when: "hace 8 min", tone: "green" },
   { player: "VAULT_07", game: "Asteroides", score: 41200, when: "hace 12 min", tone: "cyan" },
-  { player: "GLITCHA", game: "Bloque Buster", score: 28450, when: "hace 18 min", tone: "cyan" },
+  { player: "GLITCHA", game: "Arkanoid", score: 28450, when: "hace 18 min", tone: "cyan" },
   { player: "ARKADYA", game: "Serpentina", score: 7820, when: "hace 24 min", tone: "green" },
   { player: "CYBER_LU", game: "Ranaria", score: 18900, when: "hace 31 min", tone: "yellow" },
 ];
