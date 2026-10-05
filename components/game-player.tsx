@@ -140,7 +140,10 @@ export default function GamePlayer({ game }: { game: Game }) {
       </div>
 
       <div className={entry?.aspect ? "crt crt-tall" : "crt"}>
-        <div className="crt-screen" style={entry?.aspect ? { aspectRatio: entry.aspect } : undefined}>
+        <div
+          className="crt-screen"
+          style={entry?.aspect ? { aspectRatio: entry.aspect } : undefined}
+        >
           {entry ? (
             <entry.Canvas
               paused={paused || over}
@@ -200,7 +203,7 @@ export default function GamePlayer({ game }: { game: Game }) {
       {entry && (
         <div className="controls-hint">
           {entry.controls.map((c) => (
-            <span className="ctl" key={c.label}>
+            <span className="ctl" key={`${c.keys.join("")}-${c.label}`}>
               {c.keys.map((k) => (
                 <kbd key={k}>{k}</kbd>
               ))}
