@@ -162,7 +162,7 @@ export default function GamePlayer({ game }: { game: Game }) {
         </div>
       </div>
 
-      <div className={entry?.aspect ? "crt crt-tall" : "crt"}>
+      <div className={entry?.aspect ? "crt crt-tall" : entry ? "crt crt-fit" : "crt"}>
         <div
           className="crt-screen"
           style={entry?.aspect ? { aspectRatio: entry.aspect } : undefined}
