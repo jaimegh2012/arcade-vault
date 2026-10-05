@@ -1009,9 +1009,12 @@ a {
 }
 /* Juegos en vertical (p. ej. Tetris): marco centrado y estrecho */
 .crt-tall {
-  max-width: 460px;
+  /* el marco entero cabe en pantalla: alto disponible × 7/10 + padding del CRT */
+  max-width: clamp(300px, calc((100svh - 330px) * 0.7 + 48px), 460px);
   margin-inline: auto;
 }
+.crt-tall .crt-bottom { justify-content: center; }
+.crt-tall .crt-bottom span:not(.led) { display: none; }
 .crt::before {
   content: "";
   position: absolute;

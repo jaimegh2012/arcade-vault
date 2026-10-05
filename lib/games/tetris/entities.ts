@@ -106,16 +106,25 @@ export function drawBlock(
   alpha = 1,
 ): void {
   if (!colorIndex) return;
+  const px = x * size + 1;
+  const py = y * size + 1;
+  const s = size - 2;
+  const edge = Math.max(2, Math.round(size / 9));
   ctx.globalAlpha = alpha;
   ctx.fillStyle = COLORS[colorIndex];
-  ctx.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  ctx.fillStyle = "rgba(255,255,255,0.12)";
-  ctx.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+  ctx.fillRect(px, py, s, s);
+  // bisel: luz arriba/izquierda, sombra abajo/derecha
+  ctx.fillStyle = "rgba(255,255,255,0.30)";
+  ctx.fillRect(px, py, s, edge);
+  ctx.fillRect(px, py, edge, s);
+  ctx.fillStyle = "rgba(0,0,0,0.28)";
+  ctx.fillRect(px, py + s - edge, s, edge);
+  ctx.fillRect(px + s - edge, py, edge, s);
   ctx.globalAlpha = 1;
 }
 
 export function drawGrid(ctx: CanvasRenderingContext2D): void {
-  ctx.strokeStyle = "rgba(255,255,255,0.06)";
+  ctx.strokeStyle = "rgba(0,245,255,0.07)";
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -146,30 +155,38 @@ export function drawGhost(ctx: CanvasRenderingContext2D, board: Board, piece: Pi
   drawPiece(ctx, piece, ghostY(board, piece), GHOST_ALPHA);
 }
 
-// Panel NEXT: a la derecha del tablero, pieza centrada en una caja de 4×4 bloques.
+// Panel NEXT: a la derecha del tablero, pieza centrada en una caja de 4×4 bloques reducidos.
+const NEXT_BLOCK = 22;
+
 export function drawNext(ctx: CanvasRenderingContext2D, next: Piece): void {
   const panelW = ctx.canvas.width - BOARD_W;
-  const box = 4 * BLOCK;
+  const box = 4 * NEXT_BLOCK;
   const left = BOARD_W + (panelW - box) / 2;
-  const top = H * 0.06 + 28;
+  const top = 56;
 
-  ctx.fillStyle = "rgba(255,255,255,0.55)";
-  ctx.font = "10px monospace";
+  // divisoria neón entre tablero y panel
+  ctx.fillStyle = "rgba(0,245,255,0.35)";
+  ctx.fillRect(BOARD_W, 0, 1, H);
+
+  ctx.fillStyle = "#00f5ff";
+  ctx.font = "bold 12px monospace";
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
-  ctx.fillText("NEXT", BOARD_W + panelW / 2, top - 12);
+  ctx.fillText("NEXT", BOARD_W + panelW / 2, top - 14);
 
-  ctx.strokeStyle = "rgba(255,255,255,0.18)";
+  ctx.fillStyle = "rgba(255,255,255,0.03)";
+  ctx.fillRect(left, top, box, box);
+  ctx.strokeStyle = "rgba(0,245,255,0.35)";
   ctx.lineWidth = 1;
   ctx.strokeRect(left - 0.5, top - 0.5, box + 1, box + 1);
 
   const shape = next.shape;
-  const offX = Math.floor((4 - shape[0].length) / 2);
-  const offY = Math.floor((4 - shape.length) / 2);
+  const offX = (4 - shape[0].length) / 2;
+  const offY = (4 - shape.length) / 2;
   ctx.save();
   ctx.translate(left, top);
   for (let r = 0; r < shape.length; r++)
     for (let c = 0; c < shape[r].length; c++)
-      drawBlock(ctx, offX + c, offY + r, shape[r][c], BLOCK);
+      drawBlock(ctx, offX + c, offY + r, shape[r][c], NEXT_BLOCK);
   ctx.restore();
 }
