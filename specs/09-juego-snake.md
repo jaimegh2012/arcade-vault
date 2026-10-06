@@ -1,6 +1,6 @@
 # 09 — Juego SNAKE jugable con leaderboard
 
-- **Estado:** Approved
+- **Estado:** Implemented
 - **Depende de:** SPEC 05, SPEC 06, SPEC 07, SPEC 08
 - **Fecha:** 2026-10-05
 
