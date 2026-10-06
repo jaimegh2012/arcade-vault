@@ -1013,6 +1013,10 @@ a {
   max-width: clamp(300px, calc((100svh - 330px) * 0.7 + 48px), 460px);
   margin-inline: auto;
 }
+/* Aspecto horizontal (Snake 17/15): el marco entero cabe en pantalla */
+.crt-tall:has(.crt-screen[style*="17 / 15"]) {
+  max-width: clamp(320px, calc((100svh - 330px) * 17 / 15 + 48px), 728px);
+}
 /* Juegos 4:3 con motor: el marco entero cabe en pantalla */
 .crt-fit {
   max-width: clamp(320px, calc((100svh - 330px) * 4 / 3 + 48px), 100%);
