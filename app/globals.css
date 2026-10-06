@@ -701,13 +701,15 @@ a {
   content: "";
   position: absolute;
   inset: 0;
-  background-image:
-    radial-gradient(circle at 70% 50%, var(--magenta) 0 6px, transparent 7px),
-    linear-gradient(90deg, var(--green) 0 40px, transparent 40px) 20% 50% / 200px 12px no-repeat,
-    linear-gradient(90deg, var(--green) 0 12px, transparent 12px) calc(20% + 40px)
-      calc(50% - 12px) / 12px 12px no-repeat,
-    linear-gradient(90deg, var(--green) 0 12px, transparent 12px) calc(20% + 28px)
-      calc(50% - 12px) / 12px 12px no-repeat;
+  background:
+    radial-gradient(circle at 76% 28%, var(--magenta) 0 9px, transparent 10px),
+    radial-gradient(circle at 66% 66%, #04140d 0 2px, transparent 3px),
+    linear-gradient(#7dffc0, #7dffc0) 60% 58% / 12% 16% no-repeat,
+    linear-gradient(var(--green), var(--green)) 18% 58% / 42% 16% no-repeat,
+    linear-gradient(var(--green), var(--green)) 18% 34% / 12% 40% no-repeat,
+    linear-gradient(var(--green), var(--green)) 0 34% / 30% 16% no-repeat,
+    repeating-linear-gradient(0deg, rgba(0, 255, 136, 0.07) 0 1px, transparent 1px 24px),
+    repeating-linear-gradient(90deg, rgba(0, 255, 136, 0.07) 0 1px, transparent 1px 24px);
   filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.6));
 }
 
@@ -1012,6 +1014,10 @@ a {
   /* el marco entero cabe en pantalla: alto disponible × 7/10 + padding del CRT */
   max-width: clamp(300px, calc((100svh - 330px) * 0.7 + 48px), 460px);
   margin-inline: auto;
+}
+/* Aspecto horizontal (Snake 17/15): el marco entero cabe en pantalla */
+.crt-tall:has(.crt-screen[style*="17 / 15"]) {
+  max-width: clamp(320px, calc((100svh - 330px) * 17 / 15 + 48px), 728px);
 }
 /* Juegos 4:3 con motor: el marco entero cabe en pantalla */
 .crt-fit {

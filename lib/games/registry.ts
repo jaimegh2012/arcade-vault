@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import { ArkanoidCanvas } from "@/components/arkanoid-canvas";
 import { AsteroidsCanvas } from "@/components/asteroids-canvas";
+import { SnakeCanvas } from "@/components/snake-canvas";
 import { TetrisCanvas } from "@/components/tetris-canvas";
 import { BLOCK_STYLES } from "./tetris/constants";
 import type { GameCanvasProps } from "./types";
@@ -55,5 +56,16 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     hasLives: true,
     hasSound: true,
     levelJump: 5,
+  },
+  snake: {
+    Canvas: SnakeCanvas,
+    controls: [
+      { keys: ["←", "↑", "→", "↓"], label: "mover" },
+      { keys: ["WASD"], label: "mover" },
+      { keys: ["P"], label: "pausa" },
+    ],
+    engineLevel: false,
+    hasLives: false,
+    aspect: "17 / 15",
   },
 };
