@@ -67,6 +67,7 @@ Not part of the Next.js build, and excluded from ESLint, Prettier and the format
 - `templates/home-about/` — `home.jsx` and `about.jsx`, the sources of `/` and `/acerca-de`.
 - `started-games/` — the original playable JS games ported into `lib/games/`: `02-asteroids`, `03-tetris`, `04-arkanoid`. Their **code is the source of truth over their READMEs**.
 - `source-assets/` — raw art, e.g. `snake-assets/` (fruit spritesheet).
+- `catalogo-juegos.md` — hand-maintained snapshot of the `games` table; `game-suggestions-todo.md` — append-only ledger of every game the `game-planner` agent has evaluated (see **Skills & automation**).
 
 ## Skills & automation
 
@@ -74,6 +75,7 @@ Workflow skills live in `.claude/skills/` (mirrored in `.agents/skills/` so othe
 
 - `/spec <description>` — interviews first, then writes `specs/NN-slug.md` in state `Borrador`. Writes no code.
 - `/spec-impl NN-slug` — refuses unless the state means **Approved** (`Aprobado`/`Approved`); creates and switches to branch `spec-NN-slug`, then implements the plan step by step pausing for diff review. It never commits on its own. Branch creation is governed by `AutoCreateBranch` in `specs/.spec-config.yml` (currently `true`).
+- Agent `game-planner` (`.claude/agents/game-planner.md`, mirrored in `.agents/agents/`) — decides **which** game to add, before `/add-game`: scores candidates on technical fit, scoring fit and catalog diversity, picks one, and records every candidate it evaluates in `references/game-suggestions-todo.md` so it never repeats a suggestion. Writes no code and no specs; hands off a brief for `/add-game`.
 - `/add-game <started-games folder | description>` — project-specific skill that wraps `/spec` for new games: analyzes the reference, asks about catalog row / HUD / controls / scoring, and saves `specs/NN-juego-<id>.md`. Canonical models: `specs/05-juego-asteroides.md` and `specs/06-leaderboard-y-catalogo-supabase.md`.
 - Usa siempre `/frontend-design` para diseñar la interfaz de usuario.
 
