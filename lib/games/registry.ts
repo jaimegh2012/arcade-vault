@@ -4,6 +4,7 @@ import { AsteroidsCanvas } from "@/components/asteroids-canvas";
 import { SnakeCanvas } from "@/components/snake-canvas";
 import { TetrisCanvas } from "@/components/tetris-canvas";
 import { BLOCK_STYLES } from "./tetris/constants";
+import type { PadDir } from "./touch";
 import type { GameCanvasProps } from "./types";
 
 export type GameEntry = {
@@ -16,6 +17,12 @@ export type GameEntry = {
   aspect?: string; // aspect-ratio de .crt-screen; por defecto 4 / 3
   hasSound?: boolean; // true: el reproductor muestra el chip SONIDO
   levelJump?: number; // n: el overlay de pausa muestra chips 1..n
+  // Mando táctil superpuesto; sin `touch` no hay mando
+  touch?: {
+    dpad: PadDir[];
+    diagonals?: boolean; // la cruz emite dos direcciones a la vez
+    buttons?: { id: "a" | "b"; label: string }[];
+  };
 };
 
 // Juegos con motor real. Los ids sin entrada mantienen el placeholder simulado.

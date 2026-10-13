@@ -1,3 +1,5 @@
+import type { VirtualPad } from "./touch";
+
 // Contrato común de los canvas de juego: cada motor usa solo los callbacks que le aplican.
 export type GameCanvasProps = {
   paused: boolean;
@@ -20,4 +22,6 @@ export type GameCanvasProps = {
   volume?: number;
   // Cambia `seq` para pedir un salto de nivel; el canvas llama a jumpToLevel(level)
   jumpTo?: { level: number; seq: number };
+  // Mando virtual táctil (juegos con `touch` en el registro); estable por partida
+  pad?: VirtualPad;
 };
