@@ -77,5 +77,6 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     hasLives: false,
     blockStyles: BLOCK_STYLES,
     aspect: "17 / 15",
+    touch: { dpad: ["up", "down", "left", "right"] },
   },
 };

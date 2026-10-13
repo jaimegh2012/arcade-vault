@@ -1,9 +1,17 @@
 import { MAX_QUEUED_DIRS } from "./constants";
 import { isOpposite, type Dir } from "./entities";
+import type { PadButton, VirtualPad } from "../touch";
 
 export type InputHandlers = {
   onDirection: (dir: Dir) => void;
   onTogglePause: () => void;
+};
+
+const PAD_TO_DIR: Partial<Record<PadButton, Dir>> = {
+  up: "up",
+  down: "down",
+  left: "left",
+  right: "right",
 };
 
 const KEY_TO_DIR: Record<string, Dir> = {
@@ -23,8 +31,9 @@ function isTextTarget(target: EventTarget | null) {
 
 // Registra el teclado y devuelve la limpieza. Solo flechas y WASD hacen
 // preventDefault; P y Escape no. Se ignora todo con foco en input/textarea
-// o con Ctrl/Meta/Alt (atajos del navegador).
-export function attachInput(handlers: InputHandlers): () => void {
+// o con Ctrl/Meta/Alt (atajos del navegador). Con `pad`, las pulsaciones de la
+// cruz táctil entran por el mismo onDirection.
+export function attachInput(handlers: InputHandlers, pad?: VirtualPad): () => void {
   function onKeyDown(e: KeyboardEvent) {
     if (isTextTarget(e.target)) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -37,8 +46,16 @@ export function attachInput(handlers: InputHandlers): () => void {
     }
   }
 
+  const unsubscribePad = pad?.subscribe((btn, down) => {
+    const dir = PAD_TO_DIR[btn];
+    if (dir && down) handlers.onDirection(dir);
+  });
+
   window.addEventListener("keydown", onKeyDown);
-  return () => window.removeEventListener("keydown", onKeyDown);
+  return () => {
+    window.removeEventListener("keydown", onKeyDown);
+    unsubscribePad?.();
+  };
 }
 
 /**

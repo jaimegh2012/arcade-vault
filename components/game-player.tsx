@@ -4,11 +4,14 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import type { Game } from "@/lib/data";
 import { GAME_REGISTRY } from "@/lib/games/registry";
+import { createVirtualPad } from "@/lib/games/touch";
 import { useUser } from "@/lib/session";
 import { submitScore } from "@/app/juegos/[id]/jugar/actions";
 
 export default function GamePlayer({ game }: { game: Game }) {
   const router = useRouter();
+  // Mando virtual estable por partida
+  const [pad] = useState(() => createVirtualPad());
 
   const user = useUser();
   const [score, setScore] = useState(0);
@@ -113,6 +116,11 @@ export default function GamePlayer({ game }: { game: Game }) {
     return () => clearInterval(t);
   }, [entry, over, paused]);
 
+  // Con pausa o modal abierto no deben quedar botones del mando pulsados
+  useEffect(() => {
+    if (paused || over) pad.releaseAll();
+  }, [paused, over, pad]);
+
   const endGame = () => setOver(true);
   const save = async () => {
     if (saving) return;
@@ -129,6 +137,7 @@ export default function GamePlayer({ game }: { game: Game }) {
     }
   };
   const restart = () => {
+    pad.releaseAll();
     setScore(0);
     setLives(3);
     setLines(0);
@@ -212,6 +221,7 @@ export default function GamePlayer({ game }: { game: Game }) {
               muted={muted}
               volume={volume / 100}
               jumpTo={jumpTo}
+              pad={pad}
             />
           ) : (
             <div className="game-arena">

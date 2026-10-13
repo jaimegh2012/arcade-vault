@@ -19,6 +19,7 @@ export function SnakeCanvas({
   onTogglePause,
   onAutoPause,
   blockStyle,
+  pad,
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<SnakeGame | null>(null);
@@ -28,6 +29,12 @@ export function SnakeCanvas({
   useEffect(() => {
     handlers.current = { onScore, onGameOver, onTogglePause, onAutoPause };
   });
+
+  // El pad es estable por partida: se lee al crear el motor, sin recrearlo
+  const padRef = useRef(pad);
+  useEffect(() => {
+    padRef.current = pad;
+  }, [pad]);
 
   const pausedRef = useRef(paused);
   useEffect(() => {
@@ -47,11 +54,15 @@ export function SnakeCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const game = createSnakeGame(canvas, {
-      onScore: (s) => handlers.current.onScore(s),
-      onGameOver: (s) => handlers.current.onGameOver(s),
-      onTogglePause: () => handlers.current.onTogglePause?.(),
-    });
+    const game = createSnakeGame(
+      canvas,
+      {
+        onScore: (s) => handlers.current.onScore(s),
+        onGameOver: (s) => handlers.current.onGameOver(s),
+        onTogglePause: () => handlers.current.onTogglePause?.(),
+      },
+      { pad: padRef.current },
+    );
     gameRef.current = game;
     game.setBlockStyle(styleRef.current);
     game.start();
