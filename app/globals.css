@@ -3193,3 +3193,46 @@ a {
     max-width: calc((100svh - 36px) * 17 / 15 + 20px);
   }
 }
+
+/* ===== Pantalla completa: .av-player (HUD + CRT + mando + modal) ===== */
+.fs-btn {
+  padding-inline: 14px;
+  font-size: 14px;
+}
+.av-player:fullscreen {
+  max-width: none;
+  margin: 0;
+  padding: 8px 16px;
+  overflow: auto;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+}
+.av-player:fullscreen .player-hud {
+  padding: 8px 14px;
+  margin-bottom: 10px;
+}
+/* En columna flex, margin-inline:auto encogería el CRT al contenido: ancho explícito */
+.av-player:fullscreen .crt {
+  width: 100%;
+  flex-shrink: 0;
+}
+.av-player:fullscreen .crt-bottom,
+.av-player:fullscreen .block-styles,
+.av-player:fullscreen .controls-hint .ctl {
+  display: none;
+}
+.av-player:fullscreen .controls-hint {
+  margin-top: 8px;
+}
+/* El marco entero cabe en 100svh (HUD ≈ 70px + fila de sonido) */
+.av-player:fullscreen .crt-fit {
+  max-width: calc((100svh - 190px) * 4 / 3 + 48px);
+}
+.av-player:fullscreen .crt-tall {
+  max-width: calc((100svh - 150px) * 0.7 + 48px);
+}
+.av-player:fullscreen .crt-tall:has(.crt-screen[style*="17 / 15"]) {
+  max-width: calc((100svh - 150px) * 17 / 15 + 48px);
+}
