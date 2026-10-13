@@ -2981,130 +2981,262 @@ a {
   text-decoration: none;
 }
 
-/* ===== Mando táctil (bajo el CRT, fuera del área de juego) ===== */
-.touch-pad {
+/* ===== Mando táctil MK-II (bajo el CRT, fuera del área de juego) ===== */
+.tpad {
+  --k: 46px; /* tecla de la cruz */
+  --d: 144px; /* lado de la cruz */
+  --ab: 64px; /* diámetro de A/B */
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 10px 4px;
+  margin: 14px auto 0;
   max-width: 460px;
-  margin-inline: auto;
+  padding: 12px 14px 10px;
+  background: linear-gradient(180deg, #1c1c28 0%, #0c0c14 100%);
+  border: 1px solid rgba(0, 245, 255, 0.18);
+  border-radius: 16px;
+  box-shadow:
+    0 30px 80px -30px rgba(0, 245, 255, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.6);
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   touch-action: none;
   overscroll-behavior: none;
 }
-.tp-cross {
-  position: relative;
-  width: 132px;
-  height: 132px;
-  pointer-events: auto;
-  touch-action: none;
-  opacity: 0.6;
-  transition: opacity 0.08s;
-}
-.tp-cross:has(.tp-arrow.on) {
-  opacity: 1;
-}
-/* Cubo central: ancla visual de la cruz */
-.tp-cross::after {
+/* Doble borde interior */
+.tpad::before {
   content: "";
   position: absolute;
-  inset: 50% auto auto 50%;
-  width: 16px;
-  height: 16px;
-  translate: -50% -50%;
-  border-radius: 50%;
-  border: 1px solid var(--cyan);
+  inset: 4px;
+  border: 1px solid rgba(0, 245, 255, 0.14);
+  border-radius: 12px;
+  pointer-events: none;
+}
+/* Textura de puntos */
+.tpad::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 8px 8px;
+  border-radius: inherit;
+  pointer-events: none;
   opacity: 0.6;
 }
-.tp-arrow {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  border-radius: 10px;
-  border: 1px solid var(--cyan);
-  background: rgba(0, 12, 20, 0.6);
-  box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
-  color: var(--cyan);
-  font-size: 16px;
-  pointer-events: none;
-  transition:
-    background 0.08s,
-    color 0.08s,
-    box-shadow 0.08s;
-}
-.tp-arrow.on {
-  color: #031014;
-  background: var(--cyan);
-  box-shadow: 0 0 18px var(--cyan);
-}
-.tp-up {
-  top: 0;
-  left: calc(50% - 23px);
-}
-.tp-down {
-  bottom: 0;
-  left: calc(50% - 23px);
-}
-.tp-left {
-  left: 0;
-  top: calc(50% - 23px);
-}
-.tp-right {
-  right: 0;
-  top: calc(50% - 23px);
-}
-.tp-actions {
+.tpad-body {
+  position: relative;
+  z-index: 1;
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 14px;
-  align-items: flex-end;
-  pointer-events: none;
+  padding: 18px 6px;
 }
-.tp-btn {
+
+/* Cruz: un solo elemento (dirección por ángulo); las teclas son solo visuales */
+.tpad-dpad {
+  position: relative;
+  flex: none;
+  width: var(--d);
+  height: var(--d);
+  touch-action: none;
+}
+.tpad-dp {
+  position: absolute;
+  width: var(--k);
+  height: var(--k);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #1a1a25, #0a0a12);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  color: var(--ink-dim);
+  pointer-events: none;
+  box-shadow:
+    0 4px 0 #050507,
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.6);
+  transition:
+    transform 80ms,
+    box-shadow 140ms,
+    color 140ms,
+    border-color 140ms,
+    background 140ms;
+}
+.tpad-dp-arrow {
+  width: 22px;
+  height: 22px;
+  transition: filter 140ms;
+}
+.tpad-dp.on {
+  transform: translateY(3px);
+  color: var(--cyan);
+  background: linear-gradient(180deg, #08161e, #030a0e);
+  border-color: var(--cyan);
+  box-shadow:
+    0 1px 0 #050507,
+    inset 0 0 16px rgba(0, 245, 255, 0.45),
+    0 0 16px rgba(0, 245, 255, 0.5);
+}
+.tpad-dp.on .tpad-dp-arrow {
+  filter: drop-shadow(0 0 6px var(--cyan)) drop-shadow(0 0 12px var(--cyan));
+}
+.tpad-dp-up {
+  top: 0;
+  left: calc((var(--d) - var(--k)) / 2);
+}
+.tpad-dp-down {
+  bottom: 0;
+  left: calc((var(--d) - var(--k)) / 2);
+}
+.tpad-dp-left {
+  left: 0;
+  top: calc((var(--d) - var(--k)) / 2);
+}
+.tpad-dp-right {
+  right: 0;
+  top: calc((var(--d) - var(--k)) / 2);
+}
+.tpad-hub {
+  position: absolute;
+  inset: calc((var(--d) - var(--k)) / 2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 50%, #181822 0%, #08080d 80%);
+  border: 1px solid rgba(0, 245, 255, 0.15);
+  border-radius: 6px;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 12px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.tpad-hub-gem {
+  width: 12px;
+  height: 12px;
+  background: var(--cyan);
+  box-shadow:
+    0 0 10px var(--cyan),
+    inset 0 0 4px rgba(0, 0, 0, 0.5);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  animation: tpad-gem 2s ease-in-out infinite;
+}
+@keyframes tpad-gem {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tpad-hub-gem {
+    animation: none;
+  }
+}
+
+/* A/B: B a la izquierda, A a la derecha; la acción va debajo */
+.tpad-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.tpad-ab-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 74px;
-  height: 74px;
-  border-radius: 50%;
-  pointer-events: auto;
-  touch-action: none;
-  opacity: 0.6;
-  font-family: var(--pixel);
+  gap: 10px;
+  width: var(--ab);
+}
+.tpad-a {
   color: var(--magenta);
-  background: rgba(0, 0, 0, 0.35);
-  border: 2px solid var(--magenta);
-  box-shadow: 0 0 14px rgba(255, 0, 110, 0.4);
+  --ab-mid: rgba(255, 0, 110, 0.7);
+  --ab-deep: rgba(110, 0, 40, 0.95);
+  --ab-glow: rgba(255, 0, 110, 0.4);
+}
+.tpad-b {
+  color: var(--cyan);
+  --ab-mid: rgba(0, 200, 230, 0.7);
+  --ab-deep: rgba(0, 50, 70, 0.95);
+  --ab-glow: rgba(0, 245, 255, 0.4);
+}
+.tpad-ab {
+  position: relative;
+  flex: none;
+  width: var(--ab);
+  height: var(--ab);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.25), transparent 50%),
+    radial-gradient(circle at 50% 55%, var(--ab-mid), var(--ab-deep) 75%);
+  touch-action: none;
+  box-shadow:
+    0 6px 0 #050507,
+    0 0 22px var(--ab-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.4);
   transition:
-    opacity 0.08s,
-    transform 0.08s;
+    transform 80ms,
+    box-shadow 140ms;
 }
-.tp-btn b {
-  font-size: 15px;
-  font-weight: 400;
+.tpad-ab-letter {
+  position: relative;
+  z-index: 2;
+  font-family: var(--pixel);
+  font-size: 20px;
+  color: #fff;
+  letter-spacing: 0.02em;
+  text-shadow:
+    0 0 8px currentColor,
+    0 0 18px currentColor,
+    0 1px 0 rgba(0, 0, 0, 0.6);
 }
-.tp-btn small {
-  font-family: var(--mono);
-  font-size: 8px;
-  font-weight: 700;
-  margin-top: 3px;
-  letter-spacing: 0.04em;
+.tpad-ab-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px dashed currentColor;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 140ms,
+    transform 200ms;
 }
-.tp-btn.tp-b {
-  color: var(--yellow);
-  border-color: var(--yellow);
-  box-shadow: 0 0 14px rgba(245, 255, 0, 0.35);
+.tpad-ab.on {
+  transform: translateY(4px) scale(0.97);
+  box-shadow:
+    0 1px 0 #050507,
+    0 0 36px var(--ab-glow),
+    inset 0 0 18px rgba(0, 0, 0, 0.5);
 }
-.tp-btn.on {
+.tpad-ab.on .tpad-ab-ring {
   opacity: 1;
-  transform: scale(0.94);
-  background: rgba(255, 255, 255, 0.08);
+  transform: scale(1.08);
+}
+.tpad-ab-label {
+  min-height: 1em;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+/* Controles que el juego no usa: apagados, sin glow ni feedback, inertes */
+.tpad-dp.off,
+.tpad-ab.off {
+  opacity: 0.25;
+  pointer-events: none;
+}
+.tpad-ab.off {
+  filter: grayscale(0.7);
+  box-shadow: 0 6px 0 #050507;
 }
 
 /* ===== Reproductor en táctil: sin gestos del navegador y layout móvil ===== */
