@@ -3393,14 +3393,18 @@ a {
 
 /* Pantalla completa en táctil: el mando va bajo el CRT y resta alto */
 @media (pointer: coarse) {
+  /* Panel compacto (≈202px con su margen: 14 + 24 de padding/bordes + 2×10 + 144 de cruz) */
+  .av-player:fullscreen .tpad-body {
+    padding-block: 10px;
+  }
   .av-player:fullscreen .crt-fit {
-    max-width: calc((100svh - 350px) * 4 / 3 + 48px);
+    max-width: calc((100svh - 400px) * 4 / 3 + 48px);
   }
   .av-player:fullscreen .crt-tall {
-    max-width: calc((100svh - 300px) * 0.7 + 48px);
+    max-width: calc((100svh - 360px) * 0.7 + 48px);
   }
   .av-player:fullscreen .crt-tall:has(.crt-screen[style*="17 / 15"]),
   .av-player:fullscreen .tpad.crt-tall[data-aspect="17 / 15"] {
-    max-width: calc((100svh - 300px) * 17 / 15 + 48px);
+    max-width: calc((100svh - 360px) * 17 / 15 + 48px);
   }
 }
