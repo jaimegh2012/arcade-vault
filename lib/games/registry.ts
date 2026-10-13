@@ -57,6 +57,13 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     hasLines: true,
     blockStyles: BLOCK_STYLES,
     aspect: "7 / 10",
+    touch: {
+      dpad: ["up", "down", "left", "right"],
+      buttons: [
+        { id: "a", label: "ROTAR" },
+        { id: "b", label: "CAÍDA" },
+      ],
+    },
   },
   arkanoid: {
     Canvas: ArkanoidCanvas,

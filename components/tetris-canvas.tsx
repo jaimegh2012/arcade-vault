@@ -2,7 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { createTetrisGame, type TetrisGame } from "@/lib/games/tetris/engine";
-import { BLOCK_STYLES, DEFAULT_BLOCK_STYLE, H, W, type BlockStyle } from "@/lib/games/tetris/constants";
+import {
+  BLOCK_STYLES,
+  DEFAULT_BLOCK_STYLE,
+  H,
+  W,
+  type BlockStyle,
+} from "@/lib/games/tetris/constants";
 import type { GameCanvasProps } from "@/lib/games/types";
 
 export function TetrisCanvas({
@@ -15,6 +21,7 @@ export function TetrisCanvas({
   onTogglePause,
   onAutoPause,
   blockStyle,
+  pad,
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<TetrisGame | null>(null);
@@ -24,6 +31,12 @@ export function TetrisCanvas({
   useEffect(() => {
     handlers.current = { onScore, onLines, onLevel, onGameOver, onTogglePause, onAutoPause };
   });
+
+  // El pad es estable por partida: se lee al crear el motor, sin recrearlo
+  const padRef = useRef(pad);
+  useEffect(() => {
+    padRef.current = pad;
+  }, [pad]);
 
   const pausedRef = useRef(paused);
   useEffect(() => {
@@ -43,13 +56,17 @@ export function TetrisCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const game = createTetrisGame(canvas, {
-      onScore: (s) => handlers.current.onScore(s),
-      onLines: (l) => handlers.current.onLines?.(l),
-      onLevel: (l) => handlers.current.onLevel?.(l),
-      onGameOver: (s) => handlers.current.onGameOver(s),
-      onTogglePause: () => handlers.current.onTogglePause?.(),
-    });
+    const game = createTetrisGame(
+      canvas,
+      {
+        onScore: (s) => handlers.current.onScore(s),
+        onLines: (l) => handlers.current.onLines?.(l),
+        onLevel: (l) => handlers.current.onLevel?.(l),
+        onGameOver: (s) => handlers.current.onGameOver(s),
+        onTogglePause: () => handlers.current.onTogglePause?.(),
+      },
+      { pad: padRef.current },
+    );
     gameRef.current = game;
     game.setBlockStyle(styleRef.current);
     game.start();
