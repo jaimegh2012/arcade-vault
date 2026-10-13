@@ -2999,54 +2999,66 @@ a {
 }
 .tp-cross {
   position: relative;
-  width: 128px;
-  height: 128px;
-  border-radius: 50%;
+  width: 132px;
+  height: 132px;
   pointer-events: auto;
   touch-action: none;
-  opacity: 0.35;
-  background: radial-gradient(circle, rgba(0, 245, 255, 0.14), rgba(0, 0, 0, 0.35) 70%);
-  border: 1px solid var(--cyan);
-  box-shadow: 0 0 14px rgba(0, 245, 255, 0.35);
+  opacity: 0.4;
   transition: opacity 0.08s;
 }
 .tp-cross:has(.tp-arrow.on) {
-  opacity: 0.7;
+  opacity: 0.8;
+}
+/* Cubo central: ancla visual de la cruz */
+.tp-cross::after {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 16px;
+  height: 16px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  border: 1px solid var(--cyan);
+  opacity: 0.6;
 }
 .tp-arrow {
   position: absolute;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  border: 1px solid var(--cyan);
+  background: rgba(0, 12, 20, 0.6);
+  box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
   color: var(--cyan);
-  font-size: 18px;
+  font-size: 16px;
   pointer-events: none;
   transition:
+    background 0.08s,
     color 0.08s,
-    text-shadow 0.08s;
+    box-shadow 0.08s;
 }
 .tp-arrow.on {
-  color: #fff;
-  text-shadow:
-    0 0 10px var(--cyan),
-    0 0 22px var(--cyan);
+  color: #031014;
+  background: var(--cyan);
+  box-shadow: 0 0 18px var(--cyan);
 }
 .tp-up {
-  top: 6px;
-  left: calc(50% - 18px);
+  top: 0;
+  left: calc(50% - 23px);
 }
 .tp-down {
-  bottom: 6px;
-  left: calc(50% - 18px);
+  bottom: 0;
+  left: calc(50% - 23px);
 }
 .tp-left {
-  left: 6px;
-  top: calc(50% - 18px);
+  left: 0;
+  top: calc(50% - 23px);
 }
 .tp-right {
-  right: 6px;
-  top: calc(50% - 18px);
+  right: 0;
+  top: calc(50% - 23px);
 }
 .tp-actions {
   display: flex;
@@ -3059,8 +3071,8 @@ a {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 68px;
-  height: 68px;
+  width: 74px;
+  height: 74px;
   border-radius: 50%;
   pointer-events: auto;
   touch-action: none;
@@ -3079,8 +3091,10 @@ a {
   font-weight: 400;
 }
 .tp-btn small {
-  font-size: 6px;
-  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 700;
+  margin-top: 3px;
   letter-spacing: 0.04em;
 }
 .tp-btn.tp-b {
@@ -3196,8 +3210,12 @@ a {
 
 /* ===== Pantalla completa: .av-player (HUD + CRT + mando + modal) ===== */
 .fs-btn {
-  padding-inline: 14px;
-  font-size: 14px;
+  padding-inline: 12px;
+}
+.fs-btn svg {
+  width: 14px;
+  height: 14px;
+  display: block;
 }
 .av-player:fullscreen {
   max-width: none;

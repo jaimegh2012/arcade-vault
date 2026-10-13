@@ -240,7 +240,19 @@ export default function GamePlayer({ game }: { game: Game }) {
               aria-label={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
               title={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
             >
-              {isFullscreen ? "✕" : "⛶"}
+              <svg
+                viewBox="0 0 14 14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                aria-hidden
+              >
+                {isFullscreen ? (
+                  <path d="M5 1v4H1M9 1v4h4M5 13V9H1M9 13V9h4" />
+                ) : (
+                  <path d="M1 5V1h4M9 1h4v4M13 9v4H9M5 13H1V9" />
+                )}
+              </svg>
             </button>
           )}
           <button className="btn ghost" onClick={() => router.push(`/juegos/${game.id}`)}>
