@@ -1016,7 +1016,8 @@ a {
   margin-inline: auto;
 }
 /* Aspecto horizontal (Snake 17/15): el marco entero cabe en pantalla */
-.crt-tall:has(.crt-screen[style*="17 / 15"]) {
+.crt-tall:has(.crt-screen[style*="17 / 15"]),
+.tpad.crt-tall[data-aspect="17 / 15"] {
   max-width: clamp(320px, calc((100svh - 330px) * 17 / 15 + 48px), 728px);
 }
 /* Juegos 4:3 con motor: el marco entero cabe en pantalla */
@@ -2988,7 +2989,8 @@ a {
   --ab: 64px; /* diámetro de A/B */
   position: relative;
   margin: 14px auto 0;
-  max-width: 460px;
+  /* Mismo ancho que el CRT (hereda crt-fit / crt-tall), con mínimo para que quepa el contenido */
+  min-width: min(340px, 100%);
   padding: 12px 14px 10px;
   background: linear-gradient(180deg, #1c1c28 0%, #0c0c14 100%);
   border: 1px solid rgba(0, 245, 255, 0.18);
@@ -3334,7 +3336,8 @@ a {
   .crt-tall {
     max-width: calc((100svh - 36px) * 0.7 + 20px);
   }
-  .crt-tall:has(.crt-screen[style*="17 / 15"]) {
+  .crt-tall:has(.crt-screen[style*="17 / 15"]),
+  .tpad.crt-tall[data-aspect="17 / 15"] {
     max-width: calc((100svh - 36px) * 17 / 15 + 20px);
   }
 }
@@ -3363,7 +3366,8 @@ a {
   margin-bottom: 10px;
 }
 /* En columna flex, margin-inline:auto encogería el CRT al contenido: ancho explícito */
-.av-player:fullscreen .crt {
+.av-player:fullscreen .crt,
+.av-player:fullscreen .tpad {
   width: 100%;
   flex-shrink: 0;
 }
@@ -3382,7 +3386,8 @@ a {
 .av-player:fullscreen .crt-tall {
   max-width: calc((100svh - 150px) * 0.7 + 48px);
 }
-.av-player:fullscreen .crt-tall:has(.crt-screen[style*="17 / 15"]) {
+.av-player:fullscreen .crt-tall:has(.crt-screen[style*="17 / 15"]),
+.av-player:fullscreen .tpad.crt-tall[data-aspect="17 / 15"] {
   max-width: calc((100svh - 150px) * 17 / 15 + 48px);
 }
 
@@ -3394,7 +3399,8 @@ a {
   .av-player:fullscreen .crt-tall {
     max-width: calc((100svh - 300px) * 0.7 + 48px);
   }
-  .av-player:fullscreen .crt-tall:has(.crt-screen[style*="17 / 15"]) {
+  .av-player:fullscreen .crt-tall:has(.crt-screen[style*="17 / 15"]),
+  .av-player:fullscreen .tpad.crt-tall[data-aspect="17 / 15"] {
     max-width: calc((100svh - 300px) * 17 / 15 + 48px);
   }
 }

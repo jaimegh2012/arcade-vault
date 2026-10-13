@@ -51,11 +51,16 @@ export function TouchPad({
   pad,
   config,
   hidden,
+  widthClass,
+  aspect,
 }: {
   pad: VirtualPad;
   config: TouchConfig;
   // Modal de fin abierto: el mando no se dibuja
   hidden?: boolean;
+  // Misma clase de ancho que el CRT (crt-fit / crt-tall) y su aspecto, para igualar el ancho
+  widthClass?: string;
+  aspect?: string;
 }) {
   const coarse = useSyncExternalStore(subscribeCoarse, getCoarse, getCoarseServer);
   const crossRef = useRef<HTMLDivElement>(null);
@@ -98,7 +103,11 @@ export function TouchPad({
   };
 
   return (
-    <div className="tpad" onContextMenu={(e) => e.preventDefault()}>
+    <div
+      className={`tpad ${widthClass ?? ""}`}
+      data-aspect={aspect}
+      onContextMenu={(e) => e.preventDefault()}
+    >
       <div className="tpad-body">
         <div
           ref={crossRef}
