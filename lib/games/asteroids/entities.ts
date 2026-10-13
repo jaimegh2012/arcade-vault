@@ -1,5 +1,57 @@
-import { H, POWERUP_TTL, RADII, SPEEDS, TRIPLE_SPREAD, W } from "./constants";
+import {
+  ASTEROID_COLOR,
+  ASTEROID_FLAT_FILL,
+  H,
+  POWERUP_TTL,
+  RADII,
+  SHIP_COLOR,
+  SHIP_FLAT_FILL,
+  SKIN_CONTOUR_FILL,
+  SKIN_NEON_BLUR,
+  SPEEDS,
+  TRIPLE_SPREAD,
+  W,
+  type BlockStyle,
+} from "./constants";
 
+// Pinta el trazado actual según la skin; `bisel` conserva el trazo vectorial original.
+function paintPath(
+  ctx: CanvasRenderingContext2D,
+  style: BlockStyle,
+  color: string,
+  flatFill: string,
+): void {
+  switch (style) {
+    case "plano":
+      ctx.fillStyle = flatFill;
+      ctx.fill();
+      break;
+    case "neon":
+      ctx.save();
+      ctx.shadowColor = color;
+      ctx.shadowBlur = SKIN_NEON_BLUR;
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.25;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+      break;
+    case "contorno":
+      ctx.fillStyle = SKIN_CONTOUR_FILL;
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      break;
+    default:
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+  }
+}
 
 // ── Utils ─────────────────────────────────────────────────────────────────────
 export const wrap = (v: number, max: number) => ((v % max) + max) % max;
@@ -91,18 +143,16 @@ export class Asteroid {
     return [new Asteroid(this.x, this.y, next), new Asteroid(this.x, this.y, next)];
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D, style: BlockStyle) {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rot);
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 1.5;
     ctx.lineJoin = "round";
     ctx.beginPath();
     ctx.moveTo(this.verts[0][0], this.verts[0][1]);
     for (let i = 1; i < this.verts.length; i++) ctx.lineTo(this.verts[i][0], this.verts[i][1]);
     ctx.closePath();
-    ctx.stroke();
+    paintPath(ctx, style, ASTEROID_COLOR, ASTEROID_FLAT_FILL);
     ctx.restore();
   }
 }
@@ -220,7 +270,7 @@ export class Ship {
     return [new Bullet(ox, oy, this.angle)];
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D, style: BlockStyle) {
     if (this.dead) return;
     // Parpadeo durante invencibilidad de reaparición
     if (this.invincible > 0 && Math.floor(this.invincible * 8) % 2 === 0) return;
@@ -228,8 +278,6 @@ export class Ship {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 1.5;
     ctx.lineJoin = "round";
 
     // Silueta clásica: triángulo con muesca trasera
@@ -239,14 +287,15 @@ export class Ship {
     ctx.lineTo(-7, 0); // muesca trasera
     ctx.lineTo(-12, 9); // ala derecha
     ctx.closePath();
-    ctx.stroke();
+    paintPath(ctx, style, SHIP_COLOR, SHIP_FLAT_FILL);
 
-    // Llama del propulsor
+    // Llama del propulsor (igual en todas las skins)
     if (this.thrusting && Math.random() > 0.35) {
       ctx.beginPath();
       ctx.moveTo(-8, -4);
       ctx.lineTo(-8 - rand(6, 14), 0);
       ctx.lineTo(-8, 4);
+      ctx.lineWidth = 1.5;
       ctx.strokeStyle = "rgba(255, 130, 0, 0.85)";
       ctx.stroke();
     }

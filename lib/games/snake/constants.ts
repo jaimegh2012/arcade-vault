@@ -22,4 +22,10 @@ export const COLOR_SNAKE_HEAD = "#a6ffc9";
 export const COLOR_SNAKE_GLOW = "rgba(57, 255, 136, 0.75)";
 export const COLOR_EYE = "#06130c";
 
+// Skins de dibujo de la serpiente (mismos ids que tetris); la fruta (sprite) no cambia
+export { BLOCK_STYLES, DEFAULT_BLOCK_STYLE, type BlockStyle } from "@/lib/games/tetris/constants";
+export const SNAKE_GLOW_BLUR = 12; // bisel: brillo original
+export const SKIN_NEON_BLUR = 14;
+export const SKIN_CONTOUR_FILL = "rgba(255,255,255,0.04)";
+
 export const FRUITS_URL = "/games/snake/fruits.png";

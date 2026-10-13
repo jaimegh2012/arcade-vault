@@ -6,15 +6,20 @@ import {
   BLOCK_W,
   BLOCKS_ORIGIN_X,
   BLOCKS_ORIGIN_Y,
+  BLOCK_SKIN_COLORS,
   H,
   LIFE_BALL_MARGIN,
   LIFE_BALL_SIZE,
   LIFE_BALL_SPACING,
   LIFE_BALL_Y,
   PADDLE_H,
+  PADDLE_SKIN_COLOR,
   PADDLE_W,
   PADDLE_Y,
+  SKIN_CONTOUR_FILL,
+  SKIN_NEON_BLUR,
   W,
+  type BlockStyle,
 } from "./constants";
 import { LEVELS } from "./levels";
 import {
@@ -85,9 +90,55 @@ export function drawBackground(ctx: CanvasRenderingContext2D) {
   ctx.fillRect(0, 0, W, H);
 }
 
-export function drawBlocks(ctx: CanvasRenderingContext2D, sheet: Spritesheet, blocks: Block[]) {
+/** Rectángulo de color para las skins no-bisel (plano, neón, contorno). */
+function drawSkinRect(
+  ctx: CanvasRenderingContext2D,
+  r: Rect,
+  color: string,
+  style: Exclude<BlockStyle, "bisel">,
+): void {
+  const x = r.x + 1;
+  const y = r.y + 1;
+  const w = r.w - 2;
+  const h = r.h - 2;
+  switch (style) {
+    case "plano":
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, w, h);
+      break;
+    case "neon":
+      ctx.save();
+      ctx.shadowColor = color;
+      ctx.shadowBlur = SKIN_NEON_BLUR;
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.25;
+      ctx.fillRect(x, y, w, h);
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+      ctx.restore();
+      break;
+    case "contorno":
+      ctx.fillStyle = SKIN_CONTOUR_FILL;
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(x + 0.75, y + 0.75, w - 1.5, h - 1.5);
+      break;
+  }
+}
+
+export function drawBlocks(
+  ctx: CanvasRenderingContext2D,
+  sheet: Spritesheet,
+  blocks: Block[],
+  style: BlockStyle,
+) {
   for (const b of blocks) {
-    if (b.alive) drawBlockSprite(ctx, sheet, b.color, b.x, b.y, b.w, b.h);
+    if (!b.alive) continue;
+    if (style === "bisel") drawBlockSprite(ctx, sheet, b.color, b.x, b.y, b.w, b.h);
+    else drawSkinRect(ctx, b, BLOCK_SKIN_COLORS[b.color], style);
   }
 }
 
@@ -105,8 +156,14 @@ export function drawExplosions(
   }
 }
 
-export function drawPaddle(ctx: CanvasRenderingContext2D, sheet: Spritesheet, p: Paddle) {
-  drawPaddleSprite(ctx, sheet, p.x, p.y, p.w, p.h);
+export function drawPaddle(
+  ctx: CanvasRenderingContext2D,
+  sheet: Spritesheet,
+  p: Paddle,
+  style: BlockStyle,
+) {
+  if (style === "bisel") drawPaddleSprite(ctx, sheet, p.x, p.y, p.w, p.h);
+  else drawSkinRect(ctx, p, PADDLE_SKIN_COLOR, style);
 }
 
 export function drawBall(ctx: CanvasRenderingContext2D, sheet: Spritesheet, b: Ball) {

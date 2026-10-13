@@ -2,6 +2,11 @@
 
 import { useEffect, useRef } from "react";
 import { createAsteroidsGame, type AsteroidsGame } from "@/lib/games/asteroids/engine";
+import {
+  BLOCK_STYLES,
+  DEFAULT_BLOCK_STYLE,
+  type BlockStyle,
+} from "@/lib/games/asteroids/constants";
 import type { GameCanvasProps } from "@/lib/games/types";
 
 export function AsteroidsCanvas({
@@ -12,6 +17,7 @@ export function AsteroidsCanvas({
   onLevel,
   onGameOver,
   onAutoPause,
+  blockStyle,
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<AsteroidsGame | null>(null);
@@ -27,6 +33,14 @@ export function AsteroidsCanvas({
     pausedRef.current = paused;
   }, [paused]);
 
+  const style: BlockStyle =
+    BLOCK_STYLES.find((b) => b.id === blockStyle)?.id ?? DEFAULT_BLOCK_STYLE;
+  const styleRef = useRef(style);
+  useEffect(() => {
+    styleRef.current = style;
+    gameRef.current?.setBlockStyle(style);
+  }, [style]);
+
   // Montaje: crea el motor y lo destruye al desmontar (Strict Mode safe)
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -39,6 +53,7 @@ export function AsteroidsCanvas({
       onGameOver: (s) => handlers.current.onGameOver(s),
     });
     gameRef.current = game;
+    game.setBlockStyle(styleRef.current);
     game.start();
     if (pausedRef.current) game.pause();
 

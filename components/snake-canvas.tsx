@@ -2,7 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { createSnakeGame, type SnakeGame } from "@/lib/games/snake/engine";
-import { H, W } from "@/lib/games/snake/constants";
+import {
+  BLOCK_STYLES,
+  DEFAULT_BLOCK_STYLE,
+  H,
+  W,
+  type BlockStyle,
+} from "@/lib/games/snake/constants";
 import type { GameCanvasProps } from "@/lib/games/types";
 
 export function SnakeCanvas({
@@ -12,6 +18,7 @@ export function SnakeCanvas({
   onGameOver,
   onTogglePause,
   onAutoPause,
+  blockStyle,
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<SnakeGame | null>(null);
@@ -27,6 +34,14 @@ export function SnakeCanvas({
     pausedRef.current = paused;
   }, [paused]);
 
+  const style: BlockStyle =
+    BLOCK_STYLES.find((b) => b.id === blockStyle)?.id ?? DEFAULT_BLOCK_STYLE;
+  const styleRef = useRef(style);
+  useEffect(() => {
+    styleRef.current = style;
+    gameRef.current?.setBlockStyle(style);
+  }, [style]);
+
   // Montaje: crea el motor y lo destruye al desmontar (Strict Mode safe)
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -38,6 +53,7 @@ export function SnakeCanvas({
       onTogglePause: () => handlers.current.onTogglePause?.(),
     });
     gameRef.current = game;
+    game.setBlockStyle(styleRef.current);
     game.start();
     if (pausedRef.current) game.pause();
 

@@ -29,6 +29,7 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     ],
     engineLevel: true,
     hasLives: true,
+    blockStyles: BLOCK_STYLES,
   },
   tetris: {
     Canvas: TetrisCanvas,
@@ -56,6 +57,7 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     hasLives: true,
     hasSound: true,
     levelJump: 5,
+    blockStyles: BLOCK_STYLES,
   },
   snake: {
     Canvas: SnakeCanvas,
@@ -66,6 +68,7 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     ],
     engineLevel: false,
     hasLives: false,
+    blockStyles: BLOCK_STYLES,
     aspect: "17 / 15",
   },
 };
