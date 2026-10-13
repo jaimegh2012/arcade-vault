@@ -1,6 +1,6 @@
 # 11 — Gamepad móvil estilo neón MK-II
 
-- **Estado:** Aprobado
+- **Estado:** Implementado
 - **Depende de:** SPEC 10
 - **Fecha:** 2026-10-12
 
