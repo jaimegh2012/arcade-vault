@@ -16,10 +16,11 @@ Las filas no se borran: sólo cambia la columna **Estado** cuando el usuario dec
 | 003 | 2026-10-04 | `arkanoid`    | ARKANOID    | ARCADE    | Recomendado | Implementado |
 | 004 | 2026-10-05 | `snake`       | SNAKE       | ARCADE    | Recomendado | Implementado |
 | 005 | 2026-10-08 | `invasores`   | INVASORES   | SHOOTER   | Recomendado | Sugerido     |
-| 006 | 2026-10-08 | `gloton`      | GLOTÓN      | ARCADE    | Alternativa | Sugerido     |
+| 006 | 2026-10-08 | `gloton`      | GLOTÓN      | ARCADE    | Alternativa | Spec escrita |
 | 007 | 2026-10-08 | `ranaria`     | RANARIA     | ARCADE    | Alternativa | Sugerido     |
 | 008 | 2026-10-08 | `duelo-pixel` | DUELO PIXEL | VERSUS    | Descartado  | Sugerido     |
 | 009 | 2026-10-08 | `columnas`    | COLUMNAS    | PUZZLE    | Descartado  | Sugerido     |
+| 010 | 2026-10-12 | `gloton`      | GLOTÓN      | ARCADE    | Recomendado | Spec escrita |
 
 ## Fichas
 
@@ -53,7 +54,7 @@ Implementado · spec 09 · motor en `lib/games/snake/` · sin código de referen
 
 ### 006 — GLOTÓN (`gloton`)
 
-- **Fecha:** 2026-10-08 · **Veredicto:** Alternativa · **Estado:** Sugerido
+- **Fecha:** 2026-10-08 · **Veredicto:** Alternativa · **Estado:** Spec escrita
 - **Pitch (1 frase):** Un glotón recorre un laberinto comiendo puntos mientras cuatro espectros lo cazan, hasta que una píldora invierte los papeles.
 - **Categoría / color propuestos:** ARCADE / yellow
 - **Encaje técnico:** **Medio.** El dibujo y el movimiento sobre rejilla son triviales en canvas 2D y la portada `.cover-glot` ya existe, pero el corazón del juego es la IA: cuatro fantasmas con personalidades distintas, máquina de estados scatter/chase/frightened con temporizadores por nivel, casillas objetivo, túneles con wrap y la prohibición de girar 180°. Es el motor más caro y arriesgado de los evaluados; pediría `levels.ts` para los datos del laberinto además del cuarteto de módulos habitual. Sin assets externos (todo geometría), sin dependencias.
@@ -98,3 +99,22 @@ Implementado · spec 09 · motor en `lib/games/snake/` · sin código de referen
 - **HUD / `GameEntry` previsto:** habría sido `engineLevel: true`, `hasLives: false`, `hasLines: true`, `blockStyles` reutilizando los de Tetris, `aspect: "7 / 10"`; el calco del `GameEntry` de `tetris` confirma por sí solo la redundancia.
 - **Descartado a favor de / en contra de:** descartado frente a 005 (INVASORES), que aporta mecánica inédita en lugar de duplicar la de 002 (TETRIS).
 - **Notas:** Único candidato evaluado que no viene del prototipo. Si en el futuro se busca específicamente poblar PUZZLE, mejor un match-3 o un puzzle de empuje (tipo Sokoban con contador de movimientos) que otra variante de piezas que caen.
+
+### 010 — GLOTÓN (`gloton`) · game jam
+
+- **Fecha:** 2026-10-12 · **Veredicto:** Recomendado · **Estado:** Spec escrita
+- **Pitch (1 frase):** Un glotón recorre un laberinto de 28×31 comiendo 240 puntos mientras cuatro espectros lo cazan, hasta que una píldora invierte los papeles.
+- **Categoría / color propuestos:** ARCADE / yellow
+- **Encaje técnico:** **Medio-Alto según la variante.** El agente `game-jam` convirtió el riesgo que señalaba la ficha 006 (la IA de los espectros) en el eje de comparación: la variante A y la B lo recortan a una sola regla de caza (distancia euclídea al glotón en intersecciones, sin giro de 180°, espectros diferenciados por color y retardo de salida 0/3/6/9 s) y la C lo asume entero (cuarteto con personalidades, máquina `scatter/chase/frightened` con horario por nivel, salida por contador de puntos, ralentización en túnel). Sin assets externos en ninguna: todo geometría de canvas 2D; en C el sonido se sintetiza con Web Audio API (5 efectos + sirena), así que tampoco hay binarios. Módulos `constants.ts` / `levels.ts` / `entities.ts` / `input.ts` / `engine.ts`, más `ai.ts` y `audio.ts` en C.
+- **Encaje de scoring:** **Alto.** Punto 10, píldora 50 y cadena de espectros en las tres. Techos alcanzables: A **14 600**, B **143 200** (cadena extendida hasta 12 800 por espectro, teórico), C **103 200** (5 niveles con frutas y bonus). Los tres dentro de `0–9 999 999`; fin inequívoco en todos (vidas a 0, o laberinto/nivel 5 limpio).
+- **Diversidad:** **Alto.** Persecución en laberinto con IA enemiga e inversión de roles: la mecánica que seguía ausente del catálogo. Repite categoría ARCADE (ya con `arkanoid` y `snake`), tensión heredada de la ficha 006 y aceptada.
+- **HUD / `GameEntry` previsto:** común a las tres: `hasLives: true`, `aspect: "28 / 31"` (canvas lógico 560×620, `CELL = 20`). A: `engineLevel: false`, sin cambios de contrato. B: `engineLevel: false` + campo nuevo `hasChain`/`onChain` (HUD `CADENA`, calcado de `hasLines`/`onLines` del SPEC 07). C: `engineLevel: true`, `hasSound: true`, `levelJump: 5`, sin cambios de contrato (reusa lo del SPEC 08).
+- **Descartado a favor de / en contra de:** no hubo competencia: el tema de la jam nombraba el juego. Adelanta a la ficha 005 (INVASORES, `Recomendado`), que se queda en `Sugerido` por **petición directa del usuario**, no por mérito técnico.
+- **Notas:** Entrada de **game jam**, no de `game-planner`: revisa la ficha 006 (misma `id`, misma fila de catálogo) y la convierte en tres diseños completos y comparables del mismo juego, en estado `Borrador`:
+  - `specs/game-jam/gloton/00-brief.md` — estado real del catálogo, identidad común, tabla comparativa y recomendación (**variante B**).
+  - `specs/game-jam/gloton/00-preguntas.md` — 11 dudas abiertas, cada una con el valor por defecto ya aplicado en los specs.
+  - `specs/game-jam/gloton/A-juego-gloton.md` — mínima fiel (un laberinto, IA de una sola regla, sin audio).
+  - `specs/game-jam/gloton/B-juego-gloton.md` — twist «eco de la píldora»: cada espectro devorado alarga la inversión 1,5 s y la cadena no se reinicia entre píldoras.
+  - `specs/game-jam/gloton/C-juego-gloton.md` — de autor: 5 niveles, 2 trazados, cuarteto con personalidades, frutas, audio sintetizado y salto de nivel.
+
+  Catálogo: **`INSERT`** en `games` con `sort_order: 4` (la tabla real sólo usa 1, 2, 3 y 6; `20261005120000_remove_unimplemented_games.sql` borró la fila placeholder `gloton` y sus `scores` por cascada, así que no hay placeholder que actualizar). Portada **reutilizada**: `.cover-glot` ya existe en `app/globals.css`. Al promover: copiar la variante elegida a **`specs/10-juego-gloton.md`** con `Estado: Aprobado` y ejecutar `/spec-impl 10-juego-gloton` (`/spec-impl` no recursa en `specs/`, así que la promoción es manual).
