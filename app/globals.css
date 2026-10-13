@@ -2980,3 +2980,116 @@ a {
 .hall-tabs a.chip {
   text-decoration: none;
 }
+
+/* ===== Mando táctil (superpuesto al canvas, bajo el overlay de pausa z=5) ===== */
+.touch-pad {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 10px;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+.tp-cross {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  pointer-events: auto;
+  touch-action: none;
+  opacity: 0.35;
+  background: radial-gradient(circle, rgba(0, 245, 255, 0.14), rgba(0, 0, 0, 0.35) 70%);
+  border: 1px solid var(--cyan);
+  box-shadow: 0 0 14px rgba(0, 245, 255, 0.35);
+  transition: opacity 0.08s;
+}
+.tp-cross:has(.tp-arrow.on) {
+  opacity: 0.7;
+}
+.tp-arrow {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--cyan);
+  font-size: 18px;
+  pointer-events: none;
+  transition:
+    color 0.08s,
+    text-shadow 0.08s;
+}
+.tp-arrow.on {
+  color: #fff;
+  text-shadow:
+    0 0 10px var(--cyan),
+    0 0 22px var(--cyan);
+}
+.tp-up {
+  top: 6px;
+  left: calc(50% - 18px);
+}
+.tp-down {
+  bottom: 6px;
+  left: calc(50% - 18px);
+}
+.tp-left {
+  left: 6px;
+  top: calc(50% - 18px);
+}
+.tp-right {
+  right: 6px;
+  top: calc(50% - 18px);
+}
+.tp-actions {
+  display: flex;
+  gap: 14px;
+  align-items: flex-end;
+  pointer-events: none;
+}
+.tp-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  pointer-events: auto;
+  touch-action: none;
+  opacity: 0.35;
+  font-family: var(--pixel);
+  color: var(--magenta);
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid var(--magenta);
+  box-shadow: 0 0 14px rgba(255, 0, 110, 0.4);
+  transition:
+    opacity 0.08s,
+    transform 0.08s;
+}
+.tp-btn b {
+  font-size: 15px;
+  font-weight: 400;
+}
+.tp-btn small {
+  font-size: 6px;
+  margin-top: 4px;
+  letter-spacing: 0.04em;
+}
+.tp-btn.tp-b {
+  color: var(--yellow);
+  border-color: var(--yellow);
+  box-shadow: 0 0 14px rgba(245, 255, 0, 0.35);
+}
+.tp-btn.on {
+  opacity: 0.7;
+  transform: scale(0.94);
+  background: rgba(255, 255, 255, 0.08);
+}

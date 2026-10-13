@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Game } from "@/lib/data";
 import { GAME_REGISTRY } from "@/lib/games/registry";
 import { createVirtualPad } from "@/lib/games/touch";
+import { TouchPad } from "@/components/touch-pad";
 import { useUser } from "@/lib/session";
 import { submitScore } from "@/app/juegos/[id]/jugar/actions";
 
@@ -232,6 +233,7 @@ export default function GamePlayer({ game }: { game: Game }) {
               <div className="player-ship"></div>
             </div>
           )}
+          {entry?.touch && <TouchPad pad={pad} config={entry.touch} hidden={over} />}
           {paused && (
             <div className="crt-content" style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}>
               <div>
