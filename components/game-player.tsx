@@ -347,7 +347,15 @@ export default function GamePlayer({ game }: { game: Game }) {
         </div>
       </div>
 
-      {entry?.touch && <TouchPad pad={pad} config={entry.touch} hidden={over} />}
+      {entry?.touch && (
+        <TouchPad
+          pad={pad}
+          config={entry.touch}
+          hidden={over}
+          widthClass={entry.aspect ? "crt-tall" : "crt-fit"}
+          aspect={entry.aspect}
+        />
+      )}
 
       {entry && (
         <div className="controls-hint">
