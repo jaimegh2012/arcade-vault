@@ -298,7 +298,6 @@ export default function GamePlayer({ game }: { game: Game }) {
               <div className="player-ship"></div>
             </div>
           )}
-          {entry?.touch && <TouchPad pad={pad} config={entry.touch} hidden={over} />}
           {paused && (
             <div className="crt-content" style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}>
               <div>
@@ -347,6 +346,8 @@ export default function GamePlayer({ game }: { game: Game }) {
           <span>CARGA · 1MB</span>
         </div>
       </div>
+
+      {entry?.touch && <TouchPad pad={pad} config={entry.touch} hidden={over} />}
 
       {entry && (
         <div className="controls-hint">

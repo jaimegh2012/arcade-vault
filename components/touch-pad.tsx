@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
 import type { GameEntry } from "@/lib/games/registry";
-import type { PadDir, VirtualPad } from "@/lib/games/touch";
+import type { PadButton, PadDir, VirtualPad } from "@/lib/games/touch";
 
 type TouchConfig = NonNullable<GameEntry["touch"]>;
 
@@ -10,6 +10,8 @@ type TouchConfig = NonNullable<GameEntry["touch"]>;
 const DEAD_ZONE = 0.22;
 const DIAGONAL = 0.38;
 
+const ALL_DIRS: PadDir[] = ["up", "down", "left", "right"];
+const ALL_BUTTONS: PadButton[] = ["up", "down", "left", "right", "a", "b"];
 const ARROWS: Record<PadDir, string> = { up: "▲", down: "▼", left: "◀", right: "▶" };
 
 function subscribeCoarse(cb: () => void) {
@@ -49,18 +51,20 @@ export function TouchPad({
 }) {
   const coarse = useSyncExternalStore(subscribeCoarse, getCoarse, getCoarseServer);
   const crossRef = useRef<HTMLDivElement>(null);
-  const dirsRef = useRef<Set<PadDir>>(new Set());
-  const [lit, setLit] = useState<PadDir[]>([]);
-  const [heldButtons, setHeldButtons] = useState<string[]>([]);
+  // Botones pulsados según el pad (fuente de verdad): también refleja los releaseAll externos
+  // (pausa, modal, reinicio), de modo que nada se queda iluminado.
+  const [downBtns, setDownBtns] = useState<PadButton[]>([]);
+  useEffect(() => {
+    const sync = () => setDownBtns(ALL_BUTTONS.filter((b) => pad.isDown(b)));
+    sync();
+    return pad.subscribe(sync);
+  }, [pad]);
 
   if (!coarse || hidden) return null;
 
   const applyDirs = (next: Set<PadDir>) => {
-    const prev = dirsRef.current;
-    for (const d of prev) if (!next.has(d)) pad.release(d);
-    for (const d of next) if (!prev.has(d)) pad.press(d);
-    dirsRef.current = next;
-    setLit([...next]);
+    for (const d of ALL_DIRS) if (!next.has(d)) pad.release(d);
+    for (const d of next) pad.press(d);
   };
 
   const onCrossMove = (e: PointerEvent<HTMLDivElement>) => {
@@ -83,7 +87,6 @@ export function TouchPad({
   const setButton = (id: "a" | "b", down: boolean) => {
     if (down) pad.press(id);
     else pad.release(id);
-    setHeldButtons((h) => (down ? [...h.filter((x) => x !== id), id] : h.filter((x) => x !== id)));
   };
 
   return (
@@ -98,7 +101,7 @@ export function TouchPad({
         onLostPointerCapture={onCrossEnd}
       >
         {config.dpad.map((d) => (
-          <span key={d} className={`tp-arrow tp-${d}${lit.includes(d) ? " on" : ""}`}>
+          <span key={d} className={`tp-arrow tp-${d}${downBtns.includes(d) ? " on" : ""}`}>
             {ARROWS[d]}
           </span>
         ))}
@@ -108,7 +111,7 @@ export function TouchPad({
           {config.buttons.map((b) => (
             <div
               key={b.id}
-              className={`tp-btn tp-${b.id}${heldButtons.includes(b.id) ? " on" : ""}`}
+              className={`tp-btn tp-${b.id}${downBtns.includes(b.id) ? " on" : ""}`}
               onPointerDown={(e) => {
                 e.preventDefault();
                 e.currentTarget.setPointerCapture(e.pointerId);
