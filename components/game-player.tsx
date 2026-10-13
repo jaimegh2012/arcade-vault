@@ -1,14 +1,61 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import type { Game } from "@/lib/data";
 import { GAME_REGISTRY } from "@/lib/games/registry";
+import { createVirtualPad } from "@/lib/games/touch";
+import { TouchPad } from "@/components/touch-pad";
 import { useUser } from "@/lib/session";
 import { submitScore } from "@/app/juegos/[id]/jugar/actions";
 
+type FsDocument = Document & {
+  webkitFullscreenEnabled?: boolean;
+  webkitFullscreenElement?: Element | null;
+  webkitExitFullscreen?: () => Promise<void>;
+};
+type FsElement = HTMLElement & { webkitRequestFullscreen?: () => Promise<void> };
+
+// La API de pantalla completa no existe en iPhone: ahí el botón no se dibuja
+const fsSupported = () => {
+  const d = document as FsDocument;
+  return !!(d.fullscreenEnabled || d.webkitFullscreenEnabled);
+};
+const fsElement = () => {
+  const d = document as FsDocument;
+  return d.fullscreenElement ?? d.webkitFullscreenElement ?? null;
+};
+const subscribeNever = () => () => {};
+function subscribeFs(cb: () => void) {
+  document.addEventListener("fullscreenchange", cb);
+  document.addEventListener("webkitfullscreenchange", cb);
+  return () => {
+    document.removeEventListener("fullscreenchange", cb);
+    document.removeEventListener("webkitfullscreenchange", cb);
+  };
+}
+
 export default function GamePlayer({ game }: { game: Game }) {
   const router = useRouter();
+  // Mando virtual estable por partida
+  const [pad] = useState(() => createVirtualPad());
+
+  const playerRef = useRef<HTMLDivElement>(null);
+  const canFullscreen = useSyncExternalStore(subscribeNever, fsSupported, () => false);
+  const isFullscreen = useSyncExternalStore(
+    subscribeFs,
+    () => !!fsElement() && fsElement() === playerRef.current,
+    () => false,
+  );
+  const toggleFullscreen = () => {
+    const d = document as FsDocument;
+    if (fsElement()) {
+      (d.exitFullscreen ?? d.webkitExitFullscreen)?.call(d)?.catch(() => {});
+      return;
+    }
+    const el = playerRef.current as FsElement | null;
+    (el?.requestFullscreen ?? el?.webkitRequestFullscreen)?.call(el)?.catch(() => {});
+  };
 
   const user = useUser();
   const [score, setScore] = useState(0);
@@ -113,6 +160,11 @@ export default function GamePlayer({ game }: { game: Game }) {
     return () => clearInterval(t);
   }, [entry, over, paused]);
 
+  // Con pausa o modal abierto no deben quedar botones del mando pulsados
+  useEffect(() => {
+    if (paused || over) pad.releaseAll();
+  }, [paused, over, pad]);
+
   const endGame = () => setOver(true);
   const save = async () => {
     if (saving) return;
@@ -129,6 +181,7 @@ export default function GamePlayer({ game }: { game: Game }) {
     }
   };
   const restart = () => {
+    pad.releaseAll();
     setScore(0);
     setLives(3);
     setLines(0);
@@ -143,9 +196,9 @@ export default function GamePlayer({ game }: { game: Game }) {
   };
 
   return (
-    <div className="av-player fade-in">
+    <div className="av-player fade-in" ref={playerRef}>
       <div className="player-hud">
-        <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+        <div className="hud-stats">
           <div className="hud-stat">
             <div className="l">Jugador</div>
             <div className="v" style={{ color: "var(--ink)" }}>
@@ -180,6 +233,28 @@ export default function GamePlayer({ game }: { game: Game }) {
           <button className="btn magenta" onClick={endGame}>
             FIN
           </button>
+          {canFullscreen && (
+            <button
+              className="btn ghost fs-btn"
+              onClick={toggleFullscreen}
+              aria-label={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+              title={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+            >
+              <svg
+                viewBox="0 0 14 14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                aria-hidden
+              >
+                {isFullscreen ? (
+                  <path d="M5 1v4H1M9 1v4h4M5 13V9H1M9 13V9h4" />
+                ) : (
+                  <path d="M1 5V1h4M9 1h4v4M13 9v4H9M5 13H1V9" />
+                )}
+              </svg>
+            </button>
+          )}
           <button className="btn ghost" onClick={() => router.push(`/juegos/${game.id}`)}>
             SALIR
           </button>
@@ -212,6 +287,7 @@ export default function GamePlayer({ game }: { game: Game }) {
               muted={muted}
               volume={volume / 100}
               jumpTo={jumpTo}
+              pad={pad}
             />
           ) : (
             <div className="game-arena">
@@ -270,6 +346,8 @@ export default function GamePlayer({ game }: { game: Game }) {
           <span>CARGA · 1MB</span>
         </div>
       </div>
+
+      {entry?.touch && <TouchPad pad={pad} config={entry.touch} hidden={over} />}
 
       {entry && (
         <div className="controls-hint">

@@ -26,6 +26,7 @@ import {
   type Board,
   type Piece,
 } from "./entities";
+import type { VirtualPad } from "../touch";
 import { attachInput, type TetrisAction } from "./input";
 
 export type TetrisCallbacks = {
@@ -35,6 +36,8 @@ export type TetrisCallbacks = {
   onGameOver: (finalScore: number) => void;
   onTogglePause: () => void;
 };
+
+export type TetrisOptions = { pad?: VirtualPad };
 
 export type TetrisGame = {
   start(): void;
@@ -48,7 +51,9 @@ export type TetrisGame = {
 export function createTetrisGame(
   canvas: HTMLCanvasElement,
   callbacks: TetrisCallbacks,
+  options: TetrisOptions = {},
 ): TetrisGame {
+  const { pad } = options;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas 2D no disponible");
   canvas.width = W;
@@ -222,7 +227,7 @@ export function createTetrisGame(
   return {
     start() {
       if (destroyed || detachInput) return; // ya iniciado
-      detachInput = attachInput(handleAction);
+      detachInput = attachInput(handleAction, pad);
       paused = false;
       initGame();
       draw(ctx);
@@ -232,6 +237,7 @@ export function createTetrisGame(
     pause() {
       if (destroyed || paused) return;
       paused = true;
+      pad?.releaseAll();
       stopLoop();
     },
 
@@ -245,6 +251,7 @@ export function createTetrisGame(
     restart() {
       if (destroyed) return;
       paused = false;
+      pad?.releaseAll();
       initGame();
       draw(ctx);
       startLoop();
@@ -258,6 +265,7 @@ export function createTetrisGame(
 
     destroy() {
       destroyed = true;
+      pad?.releaseAll();
       stopLoop();
       detachInput?.();
       detachInput = null;

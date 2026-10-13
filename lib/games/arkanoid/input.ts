@@ -1,3 +1,5 @@
+import type { PadButton, VirtualPad } from "../touch";
+
 export type ArkanoidKeys = { left: boolean; right: boolean };
 
 export type InputHandlers = {
@@ -10,11 +12,13 @@ function isTextTarget(target: EventTarget | null) {
   return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement;
 }
 
-// Registra teclado y ratón; devuelve el estado de las flechas (mutable) y la limpieza.
-// Solo ArrowLeft/ArrowRight hacen preventDefault; P y Escape no.
+// Registra teclado, ratón y mando táctil; devuelve el estado de las flechas (mutable) y la
+// limpieza. Solo ArrowLeft/ArrowRight hacen preventDefault; P y Escape no. Con `pad`, la
+// cruz equivale a mantener las flechas; arrastrar el dedo sobre el canvas equivale al ratón.
 export function attachInput(
   canvas: HTMLCanvasElement,
   handlers: InputHandlers,
+  pad?: VirtualPad,
 ): { keys: ArkanoidKeys; detach: () => void } {
   const keys: ArkanoidKeys = { left: false, right: false };
 
@@ -39,18 +43,39 @@ export function attachInput(
   function onBlur() {
     keys.left = false;
     keys.right = false;
+    pad?.releaseAll();
+  }
+
+  // Misma conversión a coordenadas lógicas para ratón y dedo
+  function emitX(clientX: number) {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0) return;
+    handlers.onMouseX((clientX - rect.left) * (canvas.width / rect.width));
   }
 
   function onMouseMove(e: MouseEvent) {
-    const rect = canvas.getBoundingClientRect();
-    if (rect.width === 0) return;
-    handlers.onMouseX((e.clientX - rect.left) * (canvas.width / rect.width));
+    emitX(e.clientX);
   }
+
+  function onPointer(e: PointerEvent) {
+    if (e.pointerType !== "touch") return;
+    emitX(e.clientX);
+  }
+
+  function onPad(btn: PadButton, down: boolean) {
+    if (btn === "left") keys.left = down;
+    else if (btn === "right") keys.right = down;
+  }
+  const unsubscribePad = pad?.subscribe(onPad);
+  const prevTouchAction = canvas.style.touchAction;
+  canvas.style.touchAction = "none"; // el arrastre no debe hacer scroll
 
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("keyup", onKeyUp);
   window.addEventListener("blur", onBlur);
   canvas.addEventListener("mousemove", onMouseMove);
+  canvas.addEventListener("pointerdown", onPointer);
+  canvas.addEventListener("pointermove", onPointer);
 
   return {
     keys,
@@ -59,6 +84,10 @@ export function attachInput(
       window.removeEventListener("keyup", onKeyUp);
       window.removeEventListener("blur", onBlur);
       canvas.removeEventListener("mousemove", onMouseMove);
+      canvas.removeEventListener("pointerdown", onPointer);
+      canvas.removeEventListener("pointermove", onPointer);
+      canvas.style.touchAction = prevTouchAction;
+      unsubscribePad?.();
     },
   };
 }

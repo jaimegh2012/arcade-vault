@@ -9,6 +9,7 @@ import {
 } from "./constants";
 import { Asteroid, Bullet, Particle, PowerUp, Ship, dist, rand } from "./entities";
 import { createInput } from "./input";
+import type { VirtualPad } from "../touch";
 
 export type AsteroidsCallbacks = {
   onScore: (score: number) => void;
@@ -16,6 +17,8 @@ export type AsteroidsCallbacks = {
   onLevel: (level: number) => void;
   onGameOver: (finalScore: number) => void;
 };
+
+export type AsteroidsOptions = { pad?: VirtualPad };
 
 export type AsteroidsGame = {
   start(): void;
@@ -33,13 +36,14 @@ const MAX_DT = 0.05;
 export function createAsteroidsGame(
   canvas: HTMLCanvasElement,
   callbacks: AsteroidsCallbacks,
+  options: AsteroidsOptions = {},
 ): AsteroidsGame {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas 2D no disponible");
   canvas.width = W;
   canvas.height = H;
 
-  const input = createInput();
+  const input = createInput(options.pad);
   let detachInput: (() => void) | null = null;
 
   // ── Estado ─────────────────────────────────────────────────────────────────
@@ -295,6 +299,7 @@ export function createAsteroidsGame(
     restart() {
       if (destroyed) return;
       paused = false;
+      input.reset();
       initGame();
       draw(ctx);
       startLoop();

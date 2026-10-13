@@ -18,6 +18,7 @@ export function AsteroidsCanvas({
   onGameOver,
   onAutoPause,
   blockStyle,
+  pad,
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<AsteroidsGame | null>(null);
@@ -27,6 +28,12 @@ export function AsteroidsCanvas({
   useEffect(() => {
     handlers.current = { onScore, onLives, onLevel, onGameOver, onAutoPause };
   });
+
+  // El pad es estable por partida: se lee al crear el motor, sin recrearlo
+  const padRef = useRef(pad);
+  useEffect(() => {
+    padRef.current = pad;
+  }, [pad]);
 
   const pausedRef = useRef(paused);
   useEffect(() => {
@@ -46,12 +53,16 @@ export function AsteroidsCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const game = createAsteroidsGame(canvas, {
-      onScore: (s) => handlers.current.onScore(s),
-      onLives: (l) => handlers.current.onLives?.(l),
-      onLevel: (l) => handlers.current.onLevel?.(l),
-      onGameOver: (s) => handlers.current.onGameOver(s),
-    });
+    const game = createAsteroidsGame(
+      canvas,
+      {
+        onScore: (s) => handlers.current.onScore(s),
+        onLives: (l) => handlers.current.onLives?.(l),
+        onLevel: (l) => handlers.current.onLevel?.(l),
+        onGameOver: (s) => handlers.current.onGameOver(s),
+      },
+      { pad: padRef.current },
+    );
     gameRef.current = game;
     game.setBlockStyle(styleRef.current);
     game.start();

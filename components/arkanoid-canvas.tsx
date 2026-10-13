@@ -24,6 +24,7 @@ export function ArkanoidCanvas({
   volume,
   jumpTo,
   blockStyle,
+  pad,
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<ArkanoidGame | null>(null);
@@ -33,6 +34,12 @@ export function ArkanoidCanvas({
   useEffect(() => {
     handlers.current = { onScore, onLives, onLevel, onGameOver, onTogglePause, onAutoPause };
   });
+
+  // El pad es estable por partida: se lee al crear el motor, sin recrearlo
+  const padRef = useRef(pad);
+  useEffect(() => {
+    padRef.current = pad;
+  }, [pad]);
 
   const pausedRef = useRef(paused);
   useEffect(() => {
@@ -64,13 +71,17 @@ export function ArkanoidCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const game = createArkanoidGame(canvas, {
-      onScore: (s) => handlers.current.onScore(s),
-      onLives: (l) => handlers.current.onLives?.(l),
-      onLevel: (l) => handlers.current.onLevel?.(l),
-      onGameOver: (s) => handlers.current.onGameOver(s),
-      onTogglePause: () => handlers.current.onTogglePause?.(),
-    });
+    const game = createArkanoidGame(
+      canvas,
+      {
+        onScore: (s) => handlers.current.onScore(s),
+        onLives: (l) => handlers.current.onLives?.(l),
+        onLevel: (l) => handlers.current.onLevel?.(l),
+        onGameOver: (s) => handlers.current.onGameOver(s),
+        onTogglePause: () => handlers.current.onTogglePause?.(),
+      },
+      { pad: padRef.current },
+    );
     gameRef.current = game;
     game.setMuted(mutedRef.current);
     if (volumeRef.current !== undefined) game.setVolume(volumeRef.current);

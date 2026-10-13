@@ -22,6 +22,7 @@ import {
   type Dir,
   type Fruit,
 } from "./entities";
+import type { VirtualPad } from "../touch";
 import { attachInput, createDirQueue } from "./input";
 import { drawFruit, loadFruitSheet, type Spritesheet } from "./sprites";
 
@@ -30,6 +31,8 @@ export type SnakeCallbacks = {
   onGameOver: (finalScore: number) => void; // choque y victoria
   onTogglePause: () => void;
 };
+
+export type SnakeOptions = { pad?: VirtualPad };
 
 export type SnakeGame = {
   start(): void;
@@ -42,7 +45,12 @@ export type SnakeGame = {
 
 type Phase = "waiting" | "playing" | "over";
 
-export function createSnakeGame(canvas: HTMLCanvasElement, callbacks: SnakeCallbacks): SnakeGame {
+export function createSnakeGame(
+  canvas: HTMLCanvasElement,
+  callbacks: SnakeCallbacks,
+  options: SnakeOptions = {},
+): SnakeGame {
+  const { pad } = options;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas 2D no disponible");
   canvas.width = W;
@@ -170,12 +178,15 @@ export function createSnakeGame(canvas: HTMLCanvasElement, callbacks: SnakeCallb
   return {
     start() {
       if (destroyed || detachInput) return; // ya iniciado
-      detachInput = attachInput({
-        onDirection,
-        onTogglePause: () => {
-          if (!destroyed && phase !== "over") callbacks.onTogglePause();
+      detachInput = attachInput(
+        {
+          onDirection,
+          onTogglePause: () => {
+            if (!destroyed && phase !== "over") callbacks.onTogglePause();
+          },
         },
-      });
+        pad,
+      );
 
       loadFruitSheet(abort.signal)
         .then((img) => {
@@ -197,6 +208,7 @@ export function createSnakeGame(canvas: HTMLCanvasElement, callbacks: SnakeCallb
     pause() {
       if (destroyed || paused) return;
       paused = true;
+      pad?.releaseAll();
       stopLoop();
     },
 
@@ -210,6 +222,7 @@ export function createSnakeGame(canvas: HTMLCanvasElement, callbacks: SnakeCallb
     restart() {
       if (destroyed) return;
       paused = false;
+      pad?.releaseAll();
       if (!ready) return; // la carga en curso inicializa la partida
       stopLoop();
       initGame();
@@ -226,6 +239,7 @@ export function createSnakeGame(canvas: HTMLCanvasElement, callbacks: SnakeCallb
     destroy() {
       destroyed = true;
       abort.abort();
+      pad?.releaseAll();
       stopLoop();
       detachInput?.();
       detachInput = null;

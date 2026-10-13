@@ -2980,3 +2980,289 @@ a {
 .hall-tabs a.chip {
   text-decoration: none;
 }
+
+/* ===== Mando táctil (bajo el CRT, fuera del área de juego) ===== */
+.touch-pad {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 10px 4px;
+  max-width: 460px;
+  margin-inline: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+.tp-cross {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  pointer-events: auto;
+  touch-action: none;
+  opacity: 0.6;
+  transition: opacity 0.08s;
+}
+.tp-cross:has(.tp-arrow.on) {
+  opacity: 1;
+}
+/* Cubo central: ancla visual de la cruz */
+.tp-cross::after {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 16px;
+  height: 16px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  border: 1px solid var(--cyan);
+  opacity: 0.6;
+}
+.tp-arrow {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  border: 1px solid var(--cyan);
+  background: rgba(0, 12, 20, 0.6);
+  box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+  color: var(--cyan);
+  font-size: 16px;
+  pointer-events: none;
+  transition:
+    background 0.08s,
+    color 0.08s,
+    box-shadow 0.08s;
+}
+.tp-arrow.on {
+  color: #031014;
+  background: var(--cyan);
+  box-shadow: 0 0 18px var(--cyan);
+}
+.tp-up {
+  top: 0;
+  left: calc(50% - 23px);
+}
+.tp-down {
+  bottom: 0;
+  left: calc(50% - 23px);
+}
+.tp-left {
+  left: 0;
+  top: calc(50% - 23px);
+}
+.tp-right {
+  right: 0;
+  top: calc(50% - 23px);
+}
+.tp-actions {
+  display: flex;
+  gap: 14px;
+  align-items: flex-end;
+  pointer-events: none;
+}
+.tp-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  pointer-events: auto;
+  touch-action: none;
+  opacity: 0.6;
+  font-family: var(--pixel);
+  color: var(--magenta);
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid var(--magenta);
+  box-shadow: 0 0 14px rgba(255, 0, 110, 0.4);
+  transition:
+    opacity 0.08s,
+    transform 0.08s;
+}
+.tp-btn b {
+  font-size: 15px;
+  font-weight: 400;
+}
+.tp-btn small {
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 700;
+  margin-top: 3px;
+  letter-spacing: 0.04em;
+}
+.tp-btn.tp-b {
+  color: var(--yellow);
+  border-color: var(--yellow);
+  box-shadow: 0 0 14px rgba(245, 255, 0, 0.35);
+}
+.tp-btn.on {
+  opacity: 1;
+  transform: scale(0.94);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ===== Reproductor en táctil: sin gestos del navegador y layout móvil ===== */
+.hud-stats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.crt-screen {
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+@media (pointer: coarse) {
+  /* Las teclas no sirven en táctil: se quedan el chip de sonido y el volumen */
+  .controls-hint .ctl {
+    display: none;
+  }
+}
+
+/* Vertical: HUD + CRT caben en 390×844 bajo la nav */
+@media (pointer: coarse) and (orientation: portrait) {
+  .av-player {
+    margin: 12px auto;
+  }
+  .player-hud {
+    gap: 8px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+  }
+  .hud-stats {
+    gap: 12px;
+  }
+  .hud-stat {
+    gap: 2px;
+  }
+  .hud-stat .l {
+    font-size: 8px;
+  }
+  .hud-stat .v {
+    font-size: 12px;
+  }
+  .hud-actions {
+    gap: 6px;
+  }
+  .hud-actions .btn {
+    padding: 8px 10px;
+    font-size: 8px;
+  }
+  .crt {
+    padding: 10px;
+    border-radius: 18px;
+  }
+  .crt-bottom {
+    margin-top: 8px;
+  }
+  .controls-hint {
+    margin-top: 10px;
+  }
+}
+
+/* Horizontal: el marco CRT entero cabe en el alto de la ventana */
+@media (pointer: coarse) and (orientation: landscape) {
+  .av-player {
+    margin: 8px auto;
+  }
+  .player-hud {
+    gap: 8px;
+    padding: 6px 12px;
+    margin-bottom: 8px;
+  }
+  .hud-stats {
+    gap: 16px;
+  }
+  .hud-stat .v {
+    font-size: 12px;
+  }
+  .hud-actions .btn {
+    padding: 8px 10px;
+    font-size: 8px;
+  }
+  .crt {
+    padding: 10px;
+    border-radius: 18px;
+  }
+  .crt-bottom {
+    display: none;
+  }
+  .crt-fit {
+    max-width: calc((100svh - 36px) * 4 / 3 + 20px);
+  }
+  .crt-tall {
+    max-width: calc((100svh - 36px) * 0.7 + 20px);
+  }
+  .crt-tall:has(.crt-screen[style*="17 / 15"]) {
+    max-width: calc((100svh - 36px) * 17 / 15 + 20px);
+  }
+}
+
+/* ===== Pantalla completa: .av-player (HUD + CRT + mando + modal) ===== */
+.fs-btn {
+  padding-inline: 12px;
+}
+.fs-btn svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+.av-player:fullscreen {
+  max-width: none;
+  margin: 0;
+  padding: 8px 16px;
+  overflow: auto;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+}
+.av-player:fullscreen .player-hud {
+  padding: 8px 14px;
+  margin-bottom: 10px;
+}
+/* En columna flex, margin-inline:auto encogería el CRT al contenido: ancho explícito */
+.av-player:fullscreen .crt {
+  width: 100%;
+  flex-shrink: 0;
+}
+.av-player:fullscreen .crt-bottom,
+.av-player:fullscreen .block-styles,
+.av-player:fullscreen .controls-hint .ctl {
+  display: none;
+}
+.av-player:fullscreen .controls-hint {
+  margin-top: 8px;
+}
+/* El marco entero cabe en 100svh (HUD ≈ 70px + fila de sonido) */
+.av-player:fullscreen .crt-fit {
+  max-width: calc((100svh - 190px) * 4 / 3 + 48px);
+}
+.av-player:fullscreen .crt-tall {
+  max-width: calc((100svh - 150px) * 0.7 + 48px);
+}
+.av-player:fullscreen .crt-tall:has(.crt-screen[style*="17 / 15"]) {
+  max-width: calc((100svh - 150px) * 17 / 15 + 48px);
+}
+
+/* Pantalla completa en táctil: el mando va bajo el CRT y resta alto */
+@media (pointer: coarse) {
+  .av-player:fullscreen .crt-fit {
+    max-width: calc((100svh - 350px) * 4 / 3 + 48px);
+  }
+  .av-player:fullscreen .crt-tall {
+    max-width: calc((100svh - 300px) * 0.7 + 48px);
+  }
+  .av-player:fullscreen .crt-tall:has(.crt-screen[style*="17 / 15"]) {
+    max-width: calc((100svh - 300px) * 17 / 15 + 48px);
+  }
+}
