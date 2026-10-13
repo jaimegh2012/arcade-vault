@@ -77,6 +77,7 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     hasSound: true,
     levelJump: 5,
     blockStyles: BLOCK_STYLES,
+    touch: { dpad: ["left", "right"] },
   },
   snake: {
     Canvas: SnakeCanvas,

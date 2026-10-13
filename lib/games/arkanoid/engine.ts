@@ -32,6 +32,7 @@ import {
   type Explosion,
   type Paddle,
 } from "./entities";
+import type { VirtualPad } from "../touch";
 import { attachInput, type ArkanoidKeys } from "./input";
 import { EXPLOSION_DURATION, loadSpritesheet, type Spritesheet } from "./sprites";
 
@@ -42,6 +43,8 @@ export type ArkanoidCallbacks = {
   onGameOver: (finalScore: number) => void; // game over y victoria
   onTogglePause: () => void;
 };
+
+export type ArkanoidOptions = { pad?: VirtualPad };
 
 export type ArkanoidGame = {
   start(): void;
@@ -58,7 +61,9 @@ export type ArkanoidGame = {
 export function createArkanoidGame(
   canvas: HTMLCanvasElement,
   callbacks: ArkanoidCallbacks,
+  options: ArkanoidOptions = {},
 ): ArkanoidGame {
+  const { pad } = options;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas 2D no disponible");
   canvas.width = W;
@@ -259,14 +264,18 @@ export function createArkanoidGame(
   return {
     start() {
       if (destroyed || detachInput) return; // ya iniciado
-      const input = attachInput(canvas, {
-        onMouseX: (x) => {
-          if (isActive()) paddle.x = clampPaddleX(x - paddle.w / 2);
+      const input = attachInput(
+        canvas,
+        {
+          onMouseX: (x) => {
+            if (isActive()) paddle.x = clampPaddleX(x - paddle.w / 2);
+          },
+          onTogglePause: () => {
+            if (!destroyed && !gameOver) callbacks.onTogglePause();
+          },
         },
-        onTogglePause: () => {
-          if (!destroyed && !gameOver) callbacks.onTogglePause();
-        },
-      });
+        pad,
+      );
       keys = input.keys;
       detachInput = input.detach;
 
@@ -287,6 +296,7 @@ export function createArkanoidGame(
     pause() {
       if (destroyed || paused) return;
       paused = true;
+      pad?.releaseAll();
       stopLoop();
     },
 
@@ -300,6 +310,7 @@ export function createArkanoidGame(
     restart() {
       if (destroyed) return;
       paused = false;
+      pad?.releaseAll();
       if (!sheet) return; // la carga en curso inicializa la partida
       stopLoop();
       initGame();
@@ -332,6 +343,7 @@ export function createArkanoidGame(
     destroy() {
       destroyed = true;
       abort.abort();
+      pad?.releaseAll();
       stopLoop();
       detachInput?.();
       detachInput = null;
