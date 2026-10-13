@@ -2,7 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { createArkanoidGame, type ArkanoidGame } from "@/lib/games/arkanoid/engine";
-import { H, W } from "@/lib/games/arkanoid/constants";
+import {
+  BLOCK_STYLES,
+  DEFAULT_BLOCK_STYLE,
+  H,
+  W,
+  type BlockStyle,
+} from "@/lib/games/arkanoid/constants";
 import type { GameCanvasProps } from "@/lib/games/types";
 
 export function ArkanoidCanvas({
@@ -17,6 +23,7 @@ export function ArkanoidCanvas({
   muted,
   volume,
   jumpTo,
+  blockStyle,
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<ArkanoidGame | null>(null);
@@ -44,6 +51,14 @@ export function ArkanoidCanvas({
     if (volume !== undefined) gameRef.current?.setVolume(volume);
   }, [volume]);
 
+  const style: BlockStyle =
+    BLOCK_STYLES.find((b) => b.id === blockStyle)?.id ?? DEFAULT_BLOCK_STYLE;
+  const styleRef = useRef(style);
+  useEffect(() => {
+    styleRef.current = style;
+    gameRef.current?.setBlockStyle(style);
+  }, [style]);
+
   // Montaje: crea el motor y lo destruye al desmontar (Strict Mode safe)
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -59,6 +74,7 @@ export function ArkanoidCanvas({
     gameRef.current = game;
     game.setMuted(mutedRef.current);
     if (volumeRef.current !== undefined) game.setVolume(volumeRef.current);
+    game.setBlockStyle(styleRef.current);
     game.start();
     if (pausedRef.current) game.pause();
 

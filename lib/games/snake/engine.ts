@@ -1,4 +1,13 @@
-import { H, MAX_DT, POINTS_PER_FRUIT, STEP_MS, W, INITIAL_FRUIT } from "./constants";
+import {
+  DEFAULT_BLOCK_STYLE,
+  H,
+  MAX_DT,
+  POINTS_PER_FRUIT,
+  STEP_MS,
+  W,
+  INITIAL_FRUIT,
+  type BlockStyle,
+} from "./constants";
 import {
   createSnake,
   drawBoard,
@@ -27,6 +36,7 @@ export type SnakeGame = {
   pause(): void;
   resume(): void;
   restart(): void;
+  setBlockStyle(style: BlockStyle): void; // redibuja aunque esté en pausa
   destroy(): void; // cancela rAF, quita listeners, aborta carga de sprites
 };
 
@@ -51,6 +61,7 @@ export function createSnakeGame(canvas: HTMLCanvasElement, callbacks: SnakeCallb
   let score = 0;
   let phase: Phase = "waiting";
   let accumulator = 0; // ms
+  let blockStyle: BlockStyle = DEFAULT_BLOCK_STYLE;
 
   let rafId: number | null = null;
   let lastTime: number | null = null;
@@ -120,7 +131,7 @@ export function createSnakeGame(canvas: HTMLCanvasElement, callbacks: SnakeCallb
     if (!ctx) return;
     drawBoard(ctx);
     if (fruit) drawFruit(ctx, sheet, fruit.name, fruit.col, fruit.row);
-    drawSnake(ctx, snake, dir);
+    drawSnake(ctx, snake, dir, blockStyle);
   }
 
   function loop(ts: number) {
@@ -204,6 +215,12 @@ export function createSnakeGame(canvas: HTMLCanvasElement, callbacks: SnakeCallb
       initGame();
       draw();
       startLoop();
+    },
+
+    setBlockStyle(style) {
+      if (destroyed || style === blockStyle) return;
+      blockStyle = style;
+      if (ready) draw(); // antes de la carga, initGame aún no ha preparado la partida
     },
 
     destroy() {

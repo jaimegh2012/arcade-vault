@@ -1,6 +1,7 @@
 import {
   BOUNCE_SOUND_URL,
   BREAK_SOUND_URL,
+  DEFAULT_BLOCK_STYLE,
   DEFAULT_VOLUME,
   H,
   INITIAL_LIVES,
@@ -10,6 +11,7 @@ import {
   PADDLE_SPEED,
   POINTS_PER_BLOCK,
   W,
+  type BlockStyle,
 } from "./constants";
 import {
   clampPaddleX,
@@ -49,6 +51,7 @@ export type ArkanoidGame = {
   jumpToLevel(level: number): void; // 1–5; conserva score y vidas
   setMuted(muted: boolean): void;
   setVolume(volume: number): void; // 0–1
+  setBlockStyle(style: BlockStyle): void; // redibuja aunque esté en pausa
   destroy(): void; // cancela rAF, quita listeners, aborta carga de sprites
 };
 
@@ -65,6 +68,7 @@ export function createArkanoidGame(
   const breakSound = new Audio(BREAK_SOUND_URL);
   let muted = false;
   let volume = DEFAULT_VOLUME;
+  let blockStyle: BlockStyle = DEFAULT_BLOCK_STYLE;
 
   let sheet: Spritesheet | null = null;
   let keys: ArkanoidKeys = { left: false, right: false };
@@ -217,9 +221,9 @@ export function createArkanoidGame(
   function draw() {
     if (!sheet || !ctx) return;
     drawBackground(ctx);
-    drawBlocks(ctx, sheet, blocks);
+    drawBlocks(ctx, sheet, blocks, blockStyle);
     drawExplosions(ctx, sheet, explosions);
-    drawPaddle(ctx, sheet, paddle);
+    drawPaddle(ctx, sheet, paddle, blockStyle);
     drawBall(ctx, sheet, ball);
     drawLives(ctx, sheet, lives);
   }
@@ -317,6 +321,12 @@ export function createArkanoidGame(
 
     setVolume(v) {
       volume = Math.min(Math.max(v, 0), 1);
+    },
+
+    setBlockStyle(style) {
+      if (destroyed || style === blockStyle) return;
+      blockStyle = style;
+      draw(); // sin sprites cargados no dibuja nada
     },
 
     destroy() {

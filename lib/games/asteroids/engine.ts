@@ -1,4 +1,12 @@
-import { H, POINTS, POWERUP_DROP_CHANCE, POWERUP_DURATION, W } from "./constants";
+import {
+  DEFAULT_BLOCK_STYLE,
+  H,
+  POINTS,
+  POWERUP_DROP_CHANCE,
+  POWERUP_DURATION,
+  W,
+  type BlockStyle,
+} from "./constants";
 import { Asteroid, Bullet, Particle, PowerUp, Ship, dist, rand } from "./entities";
 import { createInput } from "./input";
 
@@ -14,6 +22,7 @@ export type AsteroidsGame = {
   pause(): void;
   resume(): void;
   restart(): void;
+  setBlockStyle(style: BlockStyle): void; // redibuja aunque esté en pausa
   destroy(): void; // cancela rAF y quita listeners
 };
 
@@ -46,6 +55,7 @@ export function createAsteroidsGame(
   let deadTimer = 0;
   let powerUpSpawned = false;
   let killsSinceSpawn = 0;
+  let blockStyle: BlockStyle = DEFAULT_BLOCK_STYLE;
 
   let rafId: number | null = null;
   let lastTime: number | null = null;
@@ -227,10 +237,10 @@ export function createAsteroidsGame(
     c.fillRect(0, 0, W, H);
 
     particles.forEach((p) => p.draw(c));
-    asteroids.forEach((a) => a.draw(c));
+    asteroids.forEach((a) => a.draw(c, blockStyle));
     powerUps.forEach((p) => p.draw(c));
     bullets.forEach((b) => b.draw(c));
-    ship.draw(c);
+    ship.draw(c, blockStyle);
 
     drawTripleIndicator(c);
   }
@@ -288,6 +298,12 @@ export function createAsteroidsGame(
       initGame();
       draw(ctx);
       startLoop();
+    },
+
+    setBlockStyle(style) {
+      if (destroyed || style === blockStyle) return;
+      blockStyle = style;
+      if (detachInput) draw(ctx);
     },
 
     destroy() {

@@ -11,7 +11,11 @@ import {
   INITIAL_HEAD,
   INITIAL_LENGTH,
   ROWS,
+  SKIN_CONTOUR_FILL,
+  SKIN_NEON_BLUR,
+  SNAKE_GLOW_BLUR,
   W,
+  type BlockStyle,
 } from "./constants";
 import { FRUIT_NAMES, type FruitName } from "./sprites";
 
@@ -99,14 +103,14 @@ export function drawBoard(ctx: CanvasRenderingContext2D) {
 const SEG_INSET = 3;
 const SEG_RADIUS = 9;
 
-function drawEyes(ctx: CanvasRenderingContext2D, head: Cell, dir: Dir) {
+function drawEyes(ctx: CanvasRenderingContext2D, head: Cell, dir: Dir, color: string) {
   const cx = head.col * CELL + CELL / 2;
   const cy = head.row * CELL + CELL / 2;
   const v = DIR_VECTORS[dir];
   // Vector perpendicular para separar los ojos; avance hacia donde mira.
   const px = -v.row;
   const py = v.col;
-  ctx.fillStyle = COLOR_EYE;
+  ctx.fillStyle = color;
   for (const side of [-1, 1]) {
     const ex = cx + v.col * 7 + px * side * 8;
     const ey = cy + v.row * 7 + py * side * 8;
@@ -116,25 +120,72 @@ function drawEyes(ctx: CanvasRenderingContext2D, head: Cell, dir: Dir) {
   }
 }
 
-export function drawSnake(ctx: CanvasRenderingContext2D, snake: Cell[], dir: Dir) {
+// Trazado del segmento i (0 = cabeza, un poco más grande).
+function segmentPath(ctx: CanvasRenderingContext2D, s: Cell, i: number) {
+  const inset = i === 0 ? SEG_INSET - 1 : SEG_INSET;
+  ctx.beginPath();
+  ctx.roundRect(
+    s.col * CELL + inset,
+    s.row * CELL + inset,
+    CELL - inset * 2,
+    CELL - inset * 2,
+    SEG_RADIUS,
+  );
+}
+
+export function drawSnake(
+  ctx: CanvasRenderingContext2D,
+  snake: Cell[],
+  dir: Dir,
+  style: BlockStyle,
+) {
   ctx.save();
-  ctx.shadowColor = COLOR_SNAKE_GLOW;
-  ctx.shadowBlur = 12;
-  // De cola a cabeza: la cabeza queda encima.
-  for (let i = snake.length - 1; i >= 0; i--) {
-    const s = snake[i];
-    ctx.fillStyle = i === 0 ? COLOR_SNAKE_HEAD : COLOR_SNAKE;
-    const inset = i === 0 ? SEG_INSET - 1 : SEG_INSET;
-    ctx.beginPath();
-    ctx.roundRect(
-      s.col * CELL + inset,
-      s.row * CELL + inset,
-      CELL - inset * 2,
-      CELL - inset * 2,
-      SEG_RADIUS,
-    );
-    ctx.fill();
+  switch (style) {
+    case "plano":
+      for (let i = snake.length - 1; i >= 0; i--) {
+        ctx.fillStyle = i === 0 ? COLOR_SNAKE_HEAD : COLOR_SNAKE;
+        segmentPath(ctx, snake[i], i);
+        ctx.fill();
+      }
+      break;
+    case "neon":
+      ctx.shadowColor = COLOR_SNAKE_GLOW;
+      ctx.shadowBlur = SKIN_NEON_BLUR;
+      ctx.lineWidth = 2;
+      for (let i = snake.length - 1; i >= 0; i--) {
+        const color = i === 0 ? COLOR_SNAKE_HEAD : COLOR_SNAKE;
+        segmentPath(ctx, snake[i], i);
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.25;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = color;
+        ctx.stroke();
+      }
+      break;
+    case "contorno":
+      ctx.lineWidth = 1.5;
+      for (let i = snake.length - 1; i >= 0; i--) {
+        segmentPath(ctx, snake[i], i);
+        ctx.fillStyle = SKIN_CONTOUR_FILL;
+        ctx.fill();
+        ctx.strokeStyle = i === 0 ? COLOR_SNAKE_HEAD : COLOR_SNAKE;
+        ctx.stroke();
+      }
+      break;
+    default:
+      // bisel: aspecto original (relleno con brillo)
+      ctx.shadowColor = COLOR_SNAKE_GLOW;
+      ctx.shadowBlur = SNAKE_GLOW_BLUR;
+      // De cola a cabeza: la cabeza queda encima.
+      for (let i = snake.length - 1; i >= 0; i--) {
+        ctx.fillStyle = i === 0 ? COLOR_SNAKE_HEAD : COLOR_SNAKE;
+        segmentPath(ctx, snake[i], i);
+        ctx.fill();
+      }
   }
   ctx.restore();
-  drawEyes(ctx, snake[0], dir);
+  // Con relleno tenue, los ojos oscuros no se verían: se pintan del color de la cabeza
+  const solid = style === "bisel" || style === "plano";
+  drawEyes(ctx, snake[0], dir, solid ? COLOR_EYE : COLOR_SNAKE_HEAD);
 }
