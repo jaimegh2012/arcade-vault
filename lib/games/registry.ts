@@ -37,6 +37,11 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     engineLevel: true,
     hasLives: true,
     blockStyles: BLOCK_STYLES,
+    touch: {
+      dpad: ["left", "up", "right"],
+      diagonals: true,
+      buttons: [{ id: "a", label: "DISPARAR" }],
+    },
   },
   tetris: {
     Canvas: TetrisCanvas,
