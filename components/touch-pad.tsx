@@ -12,7 +12,15 @@ const DIAGONAL = 0.38;
 
 const ALL_DIRS: PadDir[] = ["up", "down", "left", "right"];
 const ALL_BUTTONS: PadButton[] = ["up", "down", "left", "right", "a", "b"];
-const ARROWS: Record<PadDir, string> = { up: "▲", down: "▼", left: "◀", right: "▶" };
+// Triángulos de la referencia (gamepad.html), viewBox 24×24
+const ARROW_PATHS: Record<PadDir, string> = {
+  up: "M12 4 L20 16 L4 16 Z",
+  right: "M8 4 L20 12 L8 20 Z",
+  down: "M4 8 L20 8 L12 20 Z",
+  left: "M16 4 L16 20 L4 12 Z",
+};
+// Orden de la referencia: B a la izquierda, A a la derecha
+const PAD_BUTTONS: ("b" | "a")[] = ["b", "a"];
 
 function subscribeCoarse(cb: () => void) {
   const mq = window.matchMedia("(pointer: coarse)");
@@ -90,43 +98,62 @@ export function TouchPad({
   };
 
   return (
-    <div className="touch-pad" onContextMenu={(e) => e.preventDefault()}>
-      <div
-        ref={crossRef}
-        className="tp-cross"
-        onPointerDown={onCrossDown}
-        onPointerMove={onCrossMove}
-        onPointerUp={onCrossEnd}
-        onPointerCancel={onCrossEnd}
-        onLostPointerCapture={onCrossEnd}
-      >
-        {config.dpad.map((d) => (
-          <span key={d} className={`tp-arrow tp-${d}${downBtns.includes(d) ? " on" : ""}`}>
-            {ARROWS[d]}
+    <div className="tpad" onContextMenu={(e) => e.preventDefault()}>
+      <div className="tpad-body">
+        <div
+          ref={crossRef}
+          className="tpad-dpad"
+          onPointerDown={onCrossDown}
+          onPointerMove={onCrossMove}
+          onPointerUp={onCrossEnd}
+          onPointerCancel={onCrossEnd}
+          onLostPointerCapture={onCrossEnd}
+        >
+          {ALL_DIRS.map((d) => {
+            const active = config.dpad.includes(d);
+            return (
+              <span
+                key={d}
+                className={`tpad-dp tpad-dp-${d}${active ? "" : " off"}${downBtns.includes(d) ? " on" : ""}`}
+              >
+                <svg className="tpad-dp-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d={ARROW_PATHS[d]} fill="currentColor" />
+                </svg>
+              </span>
+            );
+          })}
+          <span className="tpad-hub" aria-hidden="true">
+            <span className="tpad-hub-gem" />
           </span>
-        ))}
-      </div>
-      {config.buttons && (
-        <div className="tp-actions">
-          {config.buttons.map((b) => (
-            <div
-              key={b.id}
-              className={`tp-btn tp-${b.id}${downBtns.includes(b.id) ? " on" : ""}`}
-              onPointerDown={(e) => {
-                e.preventDefault();
-                e.currentTarget.setPointerCapture(e.pointerId);
-                setButton(b.id, true);
-              }}
-              onPointerUp={() => setButton(b.id, false)}
-              onPointerCancel={() => setButton(b.id, false)}
-              onLostPointerCapture={() => setButton(b.id, false)}
-            >
-              <b>{b.id.toUpperCase()}</b>
-              <small>{b.label}</small>
-            </div>
-          ))}
         </div>
-      )}
+        <div className="tpad-actions">
+          {PAD_BUTTONS.map((id) => {
+            const def = config.buttons?.find((b) => b.id === id);
+            const active = !!def;
+            return (
+              <div key={id} className={`tpad-ab-wrap tpad-${id}`}>
+                <div
+                  className={`tpad-ab${active ? "" : " off"}${active && downBtns.includes(id) ? " on" : ""}`}
+                  {...(active && {
+                    onPointerDown: (e: PointerEvent<HTMLDivElement>) => {
+                      e.preventDefault();
+                      e.currentTarget.setPointerCapture(e.pointerId);
+                      setButton(id, true);
+                    },
+                    onPointerUp: () => setButton(id, false),
+                    onPointerCancel: () => setButton(id, false),
+                    onLostPointerCapture: () => setButton(id, false),
+                  })}
+                >
+                  <span className="tpad-ab-ring" />
+                  <span className="tpad-ab-letter">{id.toUpperCase()}</span>
+                </div>
+                <small className="tpad-ab-label">{def?.label ?? ""}</small>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
