@@ -3093,3 +3093,103 @@ a {
   transform: scale(0.94);
   background: rgba(255, 255, 255, 0.08);
 }
+
+/* ===== Reproductor en táctil: sin gestos del navegador y layout móvil ===== */
+.hud-stats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.crt-screen {
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+@media (pointer: coarse) {
+  /* Las teclas no sirven en táctil: se quedan el chip de sonido y el volumen */
+  .controls-hint .ctl {
+    display: none;
+  }
+}
+
+/* Vertical: HUD + CRT caben en 390×844 bajo la nav */
+@media (pointer: coarse) and (orientation: portrait) {
+  .av-player {
+    margin: 12px auto;
+  }
+  .player-hud {
+    gap: 8px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+  }
+  .hud-stats {
+    gap: 12px;
+  }
+  .hud-stat {
+    gap: 2px;
+  }
+  .hud-stat .l {
+    font-size: 8px;
+  }
+  .hud-stat .v {
+    font-size: 12px;
+  }
+  .hud-actions {
+    gap: 6px;
+  }
+  .hud-actions .btn {
+    padding: 8px 10px;
+    font-size: 8px;
+  }
+  .crt {
+    padding: 10px;
+    border-radius: 18px;
+  }
+  .crt-bottom {
+    margin-top: 8px;
+  }
+  .controls-hint {
+    margin-top: 10px;
+  }
+}
+
+/* Horizontal: el marco CRT entero cabe en el alto de la ventana */
+@media (pointer: coarse) and (orientation: landscape) {
+  .av-player {
+    margin: 8px auto;
+  }
+  .player-hud {
+    gap: 8px;
+    padding: 6px 12px;
+    margin-bottom: 8px;
+  }
+  .hud-stats {
+    gap: 16px;
+  }
+  .hud-stat .v {
+    font-size: 12px;
+  }
+  .hud-actions .btn {
+    padding: 8px 10px;
+    font-size: 8px;
+  }
+  .crt {
+    padding: 10px;
+    border-radius: 18px;
+  }
+  .crt-bottom {
+    display: none;
+  }
+  .crt-fit {
+    max-width: calc((100svh - 36px) * 4 / 3 + 20px);
+  }
+  .crt-tall {
+    max-width: calc((100svh - 36px) * 0.7 + 20px);
+  }
+  .crt-tall:has(.crt-screen[style*="17 / 15"]) {
+    max-width: calc((100svh - 36px) * 17 / 15 + 20px);
+  }
+}
