@@ -1,6 +1,6 @@
 # 10 — Controles táctiles para jugar en móvil
 
-- **Estado:** Aprobado
+- **Estado:** Implementado
 - **Depende de:** SPEC 05, SPEC 07, SPEC 08, SPEC 09
 - **Fecha:** 2026-10-12
 
