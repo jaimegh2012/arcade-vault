@@ -713,6 +713,22 @@ a {
   filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.6));
 }
 
+.cover-frogger {
+  background: linear-gradient(180deg, #003a2a 0 18%, #0a2a5a 18% 52%, #1a1a24 52% 86%, #003a2a 86%);
+}
+.cover-frogger::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 90%, var(--green) 0 14px, transparent 15px),
+    linear-gradient(#8b5a2b, #8b5a2b) 12% 32% / 34% 8% no-repeat,
+    linear-gradient(#8b5a2b, #8b5a2b) 58% 42% / 28% 8% no-repeat,
+    linear-gradient(var(--magenta), var(--magenta)) 20% 64% / 18% 9% no-repeat,
+    linear-gradient(var(--yellow), var(--yellow)) 62% 74% / 24% 9% no-repeat;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.5));
+}
+
 .cover-glot {
   background: radial-gradient(circle at 50% 50%, #1a002a, #0a0a18);
 }
@@ -1019,6 +1035,11 @@ a {
 .crt-tall:has(.crt-screen[style*="17 / 15"]),
 .tpad.crt-tall[data-aspect="17 / 15"] {
   max-width: clamp(320px, calc((100svh - 330px) * 17 / 15 + 48px), 728px);
+}
+/* Aspecto horizontal (Frogger 8/7): mismo criterio que Snake */
+.crt-tall:has(.crt-screen[style*="8 / 7"]),
+.tpad.crt-tall[data-aspect="8 / 7"] {
+  max-width: clamp(320px, calc((100svh - 330px) * 8 / 7 + 48px), 728px);
 }
 /* Juegos 4:3 con motor: el marco entero cabe en pantalla */
 .crt-fit {
@@ -3272,6 +3293,11 @@ a {
   .controls-hint .ctl {
     display: none;
   }
+  /* Aspecto casi cuadrado (Frogger 8/7): mismo cálculo que Snake, no el 7/10 de Tetris */
+  .crt-tall:has(.crt-screen[style*="8 / 7"]),
+  .tpad.crt-tall[data-aspect="8 / 7"] {
+    max-width: clamp(320px, calc((100svh - 330px) * 8 / 7 + 48px), 728px);
+  }
 }
 
 /* Vertical: HUD + CRT caben en 390×844 bajo la nav */
@@ -3352,6 +3378,10 @@ a {
   .tpad.crt-tall[data-aspect="17 / 15"] {
     max-width: calc((100svh - 36px) * 17 / 15 + 20px);
   }
+  .crt-tall:has(.crt-screen[style*="8 / 7"]),
+  .tpad.crt-tall[data-aspect="8 / 7"] {
+    max-width: calc((100svh - 36px) * 8 / 7 + 20px);
+  }
 }
 
 /* ===== Pantalla completa: .av-player (HUD + CRT + mando + modal) ===== */
@@ -3402,6 +3432,10 @@ a {
 .av-player:fullscreen .tpad.crt-tall[data-aspect="17 / 15"] {
   max-width: calc((100svh - 150px) * 17 / 15 + 48px);
 }
+.av-player:fullscreen .crt-tall:has(.crt-screen[style*="8 / 7"]),
+.av-player:fullscreen .tpad.crt-tall[data-aspect="8 / 7"] {
+  max-width: calc((100svh - 150px) * 8 / 7 + 48px);
+}
 
 /* Pantalla completa en táctil: el mando va bajo el CRT y resta alto */
 @media (pointer: coarse) {
@@ -3418,5 +3452,9 @@ a {
   .av-player:fullscreen .crt-tall:has(.crt-screen[style*="17 / 15"]),
   .av-player:fullscreen .tpad.crt-tall[data-aspect="17 / 15"] {
     max-width: calc((100svh - 360px) * 17 / 15 + 48px);
+  }
+  .av-player:fullscreen .crt-tall:has(.crt-screen[style*="8 / 7"]),
+  .av-player:fullscreen .tpad.crt-tall[data-aspect="8 / 7"] {
+    max-width: calc((100svh - 360px) * 8 / 7 + 48px);
   }
 }
