@@ -1036,6 +1036,11 @@ a {
 .tpad.crt-tall[data-aspect="17 / 15"] {
   max-width: clamp(320px, calc((100svh - 330px) * 17 / 15 + 48px), 728px);
 }
+/* Aspecto horizontal (Frogger 8/7): mismo criterio que Snake */
+.crt-tall:has(.crt-screen[style*="8 / 7"]),
+.tpad.crt-tall[data-aspect="8 / 7"] {
+  max-width: clamp(320px, calc((100svh - 330px) * 8 / 7 + 48px), 728px);
+}
 /* Juegos 4:3 con motor: el marco entero cabe en pantalla */
 .crt-fit {
   max-width: clamp(320px, calc((100svh - 330px) * 4 / 3 + 48px), 100%);
@@ -3426,6 +3431,10 @@ a {
 .av-player:fullscreen .crt-tall:has(.crt-screen[style*="17 / 15"]),
 .av-player:fullscreen .tpad.crt-tall[data-aspect="17 / 15"] {
   max-width: calc((100svh - 150px) * 17 / 15 + 48px);
+}
+.av-player:fullscreen .crt-tall:has(.crt-screen[style*="8 / 7"]),
+.av-player:fullscreen .tpad.crt-tall[data-aspect="8 / 7"] {
+  max-width: calc((100svh - 150px) * 8 / 7 + 48px);
 }
 
 /* Pantalla completa en táctil: el mando va bajo el CRT y resta alto */
