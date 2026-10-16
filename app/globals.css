@@ -713,6 +713,22 @@ a {
   filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.6));
 }
 
+.cover-frogger {
+  background: linear-gradient(180deg, #003a2a 0 18%, #0a2a5a 18% 52%, #1a1a24 52% 86%, #003a2a 86%);
+}
+.cover-frogger::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 90%, var(--green) 0 14px, transparent 15px),
+    linear-gradient(#8b5a2b, #8b5a2b) 12% 32% / 34% 8% no-repeat,
+    linear-gradient(#8b5a2b, #8b5a2b) 58% 42% / 28% 8% no-repeat,
+    linear-gradient(var(--magenta), var(--magenta)) 20% 64% / 18% 9% no-repeat,
+    linear-gradient(var(--yellow), var(--yellow)) 62% 74% / 24% 9% no-repeat;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.5));
+}
+
 .cover-glot {
   background: radial-gradient(circle at 50% 50%, #1a002a, #0a0a18);
 }
