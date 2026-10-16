@@ -158,6 +158,26 @@ export function getSupport(frog: Frog, lanes: Lane[]): { lane: Lane; entity: Ent
   return null;
 }
 
+/** ¿Un vehículo solapa a la rana? Se usa una caja algo más estrecha que la celda. */
+export function checkRoadCollision(frog: Frog, lanes: Lane[]): boolean {
+  if (!isRoadRow(frog.row)) return false;
+  const left = frog.col + 0.15;
+  const right = frog.col + 0.85;
+  for (const lane of lanes) {
+    if (lane.row !== frog.row) continue;
+    for (const e of lane.entities) {
+      if (right > e.col && left < e.col + e.width) return true;
+    }
+  }
+  return false;
+}
+
+/** Índice de la boca destino bajo la rana, o -1 si cae en el muro entre bocas. */
+export function goalIndexAt(frog: Frog): number {
+  const x = frog.col + 0.5;
+  return GOAL_COLS.findIndex((c) => x >= c && x < c + GOAL_WIDTH);
+}
+
 /** Avanza entidades en anillo y el ciclo de inmersión de las tortugas. dt en segundos. */
 export function updateLanes(lanes: Lane[], dt: number) {
   const cycle = TURTLE_VISIBLE_S + TURTLE_SUBMERGED_S;

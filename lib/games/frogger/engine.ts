@@ -5,9 +5,13 @@ import {
   INITIAL_LIVES,
   JUMP_MS,
   MAX_DT,
+  POINTS_PER_GOAL,
+  POINTS_PER_ROW,
+  POINTS_PER_TIME_SECOND,
   ROUND_TIME_MIN_S,
   ROUND_TIME_S,
   ROUND_TIME_STEP_S,
+  ROW_GOALS,
   ROW_START,
   ROWS,
   START_COL,
@@ -15,6 +19,7 @@ import {
 } from "./constants";
 import {
   buildLanes,
+  checkRoadCollision,
   createFrog,
   DIR_VECTORS,
   drawBoard,
@@ -23,7 +28,9 @@ import {
   drawLane,
   drawTimeBar,
   getSupport,
+  goalIndexAt,
   isRiverRow,
+  isRoadRow,
   updateLanes,
   type Dir,
   type Frog,
@@ -80,6 +87,7 @@ export function createFroggerGame(
   let level = 1;
   let timeLeft = roundTime(1); // s
   let phase: Phase = "waiting";
+  let bestRow = ROW_START; // fila más alta alcanzada en la ronda (puntos por avance)
 
   let rafId: number | null = null;
   let lastTime: number | null = null;
@@ -97,6 +105,7 @@ export function createFroggerGame(
     level = 1;
     timeLeft = roundTime(1);
     phase = "waiting";
+    bestRow = ROW_START;
     // El reinicio fuerza la emisión de los valores iniciales
     callbacks.onScore(score);
     callbacks.onLives(lives);
@@ -108,9 +117,52 @@ export function createFroggerGame(
     return phase === "over";
   }
 
-  // Los pasos 5–7 del plan rellenan estos tres puntos de entrada.
+  function setScore(v: number) {
+    if (v === score) return;
+    score = v;
+    callbacks.onScore(score);
+  }
+
+  /** Rana de vuelta a la salida con el temporizador completo. */
+  function respawn() {
+    frog = createFrog(START_COL, ROW_START);
+    pendingDir = null;
+    bestRow = ROW_START;
+    timeLeft = roundTime(level);
+  }
+
+  // Resuelve la celda donde acaba de aterrizar la rana.
   function landFrog() {
-    // Resolver la celda de destino: muerte, boca destino y puntuación
+    if (frog.row < bestRow) {
+      setScore(score + (bestRow - frog.row) * POINTS_PER_ROW);
+      bestRow = frog.row;
+    }
+    if (frog.row === ROW_GOALS) {
+      const i = goalIndexAt(frog);
+      if (i < 0 || goals[i]) {
+        killFrog(); // muro entre bocas o boca ya ocupada
+        return;
+      }
+      goals[i] = true;
+      setScore(score + POINTS_PER_GOAL + Math.floor(timeLeft) * POINTS_PER_TIME_SECOND);
+      if (goals.every(Boolean)) completeRound();
+      else respawn();
+    }
+  }
+
+  // Muertes por contacto, evaluadas cada frame con la rana quieta.
+  function checkHazards() {
+    if (frog.animating || frog.row === ROW_GOALS) return;
+    if (isRoadRow(frog.row) && checkRoadCollision(frog, lanes)) killFrog();
+    else if (isRiverRow(frog.row)) {
+      // Sin apoyo (agua o tortuga sumergida) o arrastrada fuera por los bordes
+      if (!getSupport(frog, lanes) || frog.col < -0.5 || frog.col > COLS - 0.5) killFrog();
+    }
+  }
+
+  // Los pasos 6 y 7 del plan rellenan estos dos puntos de entrada.
+  function completeRound() {
+    // Siguiente ronda: nivel, carriles, bocas y temporizador
   }
 
   function killFrog() {
@@ -162,6 +214,7 @@ export function createFroggerGame(
   function update(dt: number) {
     updateLanes(lanes, dt);
     updateFrog(dt);
+    checkHazards();
     if (phase !== "playing") return;
     timeLeft = Math.max(0, timeLeft - dt);
     if (timeLeft === 0) killFrog();
