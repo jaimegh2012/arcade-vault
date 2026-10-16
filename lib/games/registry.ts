@@ -102,6 +102,7 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     ],
     engineLevel: true,
     hasLives: true,
+    blockStyles: BLOCK_STYLES,
     aspect: "8 / 7",
     touch: { dpad: ["up", "down", "left", "right"] },
   },

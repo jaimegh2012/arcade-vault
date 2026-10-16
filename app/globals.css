@@ -3288,6 +3288,11 @@ a {
   .controls-hint .ctl {
     display: none;
   }
+  /* Aspecto casi cuadrado (Frogger 8/7): mismo cálculo que Snake, no el 7/10 de Tetris */
+  .crt-tall:has(.crt-screen[style*="8 / 7"]),
+  .tpad.crt-tall[data-aspect="8 / 7"] {
+    max-width: clamp(320px, calc((100svh - 330px) * 8 / 7 + 48px), 728px);
+  }
 }
 
 /* Vertical: HUD + CRT caben en 390×844 bajo la nav */
@@ -3368,6 +3373,10 @@ a {
   .tpad.crt-tall[data-aspect="17 / 15"] {
     max-width: calc((100svh - 36px) * 17 / 15 + 20px);
   }
+  .crt-tall:has(.crt-screen[style*="8 / 7"]),
+  .tpad.crt-tall[data-aspect="8 / 7"] {
+    max-width: calc((100svh - 36px) * 8 / 7 + 20px);
+  }
 }
 
 /* ===== Pantalla completa: .av-player (HUD + CRT + mando + modal) ===== */
@@ -3434,5 +3443,9 @@ a {
   .av-player:fullscreen .crt-tall:has(.crt-screen[style*="17 / 15"]),
   .av-player:fullscreen .tpad.crt-tall[data-aspect="17 / 15"] {
     max-width: calc((100svh - 360px) * 17 / 15 + 48px);
+  }
+  .av-player:fullscreen .crt-tall:has(.crt-screen[style*="8 / 7"]),
+  .av-player:fullscreen .tpad.crt-tall[data-aspect="8 / 7"] {
+    max-width: calc((100svh - 360px) * 8 / 7 + 48px);
   }
 }

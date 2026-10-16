@@ -2,7 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { createFroggerGame, type FroggerGame } from "@/lib/games/frogger/engine";
-import { H, W } from "@/lib/games/frogger/constants";
+import {
+  BLOCK_STYLES,
+  DEFAULT_BLOCK_STYLE,
+  H,
+  W,
+  type BlockStyle,
+} from "@/lib/games/frogger/constants";
 import type { GameCanvasProps } from "@/lib/games/types";
 
 export function FroggerCanvas({
@@ -14,6 +20,7 @@ export function FroggerCanvas({
   onGameOver,
   onTogglePause,
   onAutoPause,
+  blockStyle,
   pad,
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -36,6 +43,15 @@ export function FroggerCanvas({
     pausedRef.current = paused;
   }, [paused]);
 
+  // Estilo de entidades: se valida contra la lista y se aplica sin recrear el motor
+  const style: BlockStyle =
+    BLOCK_STYLES.find((b) => b.id === blockStyle)?.id ?? DEFAULT_BLOCK_STYLE;
+  const styleRef = useRef(style);
+  useEffect(() => {
+    styleRef.current = style;
+    gameRef.current?.setBlockStyle(style);
+  }, [style]);
+
   // Montaje: crea el motor y lo destruye al desmontar (Strict Mode safe)
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -53,6 +69,7 @@ export function FroggerCanvas({
       { pad: padRef.current },
     );
     gameRef.current = game;
+    game.setBlockStyle(styleRef.current);
     game.start();
     if (pausedRef.current) game.pause();
 

@@ -1,5 +1,6 @@
 import {
   COLS,
+  DEFAULT_BLOCK_STYLE,
   GOAL_COUNT,
   H,
   INITIAL_LIVES,
@@ -17,6 +18,7 @@ import {
   ROWS,
   START_COL,
   W,
+  type BlockStyle,
 } from "./constants";
 import {
   buildLanes,
@@ -55,6 +57,7 @@ export type FroggerGame = {
   pause(): void;
   resume(): void;
   restart(): void;
+  setBlockStyle(style: BlockStyle): void; // redibuja aunque esté en pausa
   destroy(): void; // cancela rAF y quita listeners
 };
 
@@ -95,6 +98,7 @@ export function createFroggerGame(
   let paused = false;
   let destroyed = false;
   let started = false;
+  let blockStyle: BlockStyle = DEFAULT_BLOCK_STYLE;
 
   function initGame() {
     lanes = buildLanes(1);
@@ -240,9 +244,9 @@ export function createFroggerGame(
   function draw() {
     if (!ctx) return;
     drawBoard(ctx);
-    for (const lane of lanes) drawLane(ctx, lane);
-    drawGoals(ctx, goals);
-    drawFrogAt(ctx, frog);
+    for (const lane of lanes) drawLane(ctx, lane, blockStyle);
+    drawGoals(ctx, goals, blockStyle);
+    drawFrogAt(ctx, frog, blockStyle);
     drawTimeBar(ctx, timeLeft / roundTime(level));
   }
 
@@ -316,6 +320,12 @@ export function createFroggerGame(
       initGame();
       draw();
       startLoop();
+    },
+
+    setBlockStyle(style) {
+      if (destroyed || style === blockStyle) return;
+      blockStyle = style;
+      if (started) draw(); // antes de start() el primer draw ya usa el estilo nuevo
     },
 
     destroy() {

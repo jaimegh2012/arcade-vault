@@ -69,6 +69,15 @@ export const COLOR_FROG_PUPIL = "#06130c";
 export const FROG_BODY_W = 28; // px
 export const FROG_BODY_H = 24; // px
 
+// Skins de entidades (selector BLOQUES): lista y tipo compartidos con tetris
+export { BLOCK_STYLES, DEFAULT_BLOCK_STYLE, type BlockStyle } from "@/lib/games/tetris/constants";
+export const SKIN_NEON_BLUR = 10;
+export const SKIN_NEON_LINE = 2;
+export const SKIN_CONTOUR_LINE = 1.5;
+export const SKIN_CONTOUR_FILL = "rgba(255,255,255,0.04)";
+export const SKIN_SUBMERGED_ALPHA = 0.3; // tortugas sumergidas en skins no-bisel
+export const COLOR_LOG_SKIN = "#d08a45"; // tronco más claro: el marrón original apenas brilla
+
 // HUD interno del canvas
 export const COLOR_HUD_TEXT = "#ffffff";
 export const COLOR_TIME_OK = "#39ff88";

@@ -9,6 +9,7 @@ import {
   COLOR_GOAL_ZONE,
   COLOR_LOG,
   COLOR_LOG_GRAIN,
+  COLOR_LOG_SKIN,
   COLOR_RIVER,
   COLOR_ROAD,
   COLOR_ROAD_LINE,
@@ -36,10 +37,16 @@ import {
   ROW_ROAD_BOT,
   ROW_ROAD_TOP,
   ROWS,
+  SKIN_CONTOUR_FILL,
+  SKIN_CONTOUR_LINE,
+  SKIN_NEON_BLUR,
+  SKIN_NEON_LINE,
+  SKIN_SUBMERGED_ALPHA,
   SPEED_PER_LEVEL,
   TURTLE_SUBMERGED_S,
   TURTLE_VISIBLE_S,
   W,
+  type BlockStyle,
 } from "./constants";
 
 export type Dir = "up" | "down" | "left" | "right";
@@ -236,7 +243,7 @@ export function drawBoard(ctx: CanvasRenderingContext2D) {
   ctx.setLineDash([]);
 }
 
-export function drawGoals(ctx: CanvasRenderingContext2D, goals: boolean[]) {
+export function drawGoals(ctx: CanvasRenderingContext2D, goals: boolean[], style: BlockStyle) {
   GOAL_COLS.forEach((col, i) => {
     const x = col * CELL;
     const y = ROW_GOALS * CELL;
@@ -246,8 +253,50 @@ export function drawGoals(ctx: CanvasRenderingContext2D, goals: boolean[]) {
     ctx.strokeStyle = COLOR_GOAL_BORDER;
     ctx.lineWidth = 2;
     ctx.strokeRect(x + 2, y + 3, w - 4, CELL - 6);
-    if (goals[i]) drawFrog(ctx, x + w / 2, y + CELL / 2, "down", 0, true);
+    if (goals[i]) drawFrog(ctx, x + w / 2, y + CELL / 2, "down", 0, style, true);
   });
+}
+
+type SkinStyle = Exclude<BlockStyle, "bisel">;
+
+/**
+ * Pinta una forma con una skin no-bisel. `path` traza un único subcamino (incluye
+ * beginPath). save/restore para que shadowBlur y globalAlpha no se filtren.
+ */
+function drawSkinShape(
+  ctx: CanvasRenderingContext2D,
+  path: () => void,
+  color: string,
+  style: SkinStyle,
+  alpha = 1,
+) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  path();
+  switch (style) {
+    case "plano":
+      ctx.fillStyle = color;
+      ctx.fill();
+      break;
+    case "neon":
+      ctx.shadowColor = color;
+      ctx.shadowBlur = SKIN_NEON_BLUR;
+      ctx.fillStyle = color;
+      ctx.globalAlpha = alpha * 0.25;
+      ctx.fill();
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = SKIN_NEON_LINE;
+      ctx.stroke();
+      break;
+    case "contorno":
+      ctx.fillStyle = SKIN_CONTOUR_FILL;
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = SKIN_CONTOUR_LINE;
+      ctx.stroke();
+  }
+  ctx.restore();
 }
 
 function drawWheels(ctx: CanvasRenderingContext2D, x: number, y: number, w: number) {
@@ -267,8 +316,18 @@ function drawCar(
   y: number,
   color: string,
   dir: 1 | -1,
+  style: BlockStyle,
 ) {
   const w = e.width * CELL;
+  if (style !== "bisel") {
+    // Skins: solo la carrocería, sin parabrisas ni ruedas
+    const body = () => {
+      ctx.beginPath();
+      ctx.roundRect(x + 3, y + 8, w - 6, CELL - 16, 5);
+    };
+    drawSkinShape(ctx, body, color, style);
+    return;
+  }
   ctx.fillStyle = color;
   ctx.beginPath();
   ctx.roundRect(x + 3, y + 8, w - 6, CELL - 16, 5);
@@ -279,11 +338,32 @@ function drawCar(
   drawWheels(ctx, x, y, w);
 }
 
-function drawTruck(ctx: CanvasRenderingContext2D, e: Entity, x: number, y: number, dir: 1 | -1) {
+function drawTruck(
+  ctx: CanvasRenderingContext2D,
+  e: Entity,
+  x: number,
+  y: number,
+  dir: 1 | -1,
+  style: BlockStyle,
+) {
   const w = e.width * CELL;
   const cabW = CELL - 4;
   const cabX = dir === 1 ? x + w - cabW - 2 : x + 2;
   const boxX = dir === 1 ? x + 2 : x + cabW + 2;
+  if (style !== "bisel") {
+    // Skins: caja y cabina como dos formas, sin ventanilla ni ruedas
+    const box = () => {
+      ctx.beginPath();
+      ctx.rect(boxX, y + 6, w - cabW - 4, CELL - 12);
+    };
+    const cab = () => {
+      ctx.beginPath();
+      ctx.roundRect(cabX, y + 8, cabW, CELL - 16, 4);
+    };
+    drawSkinShape(ctx, box, COLOR_TRUCK, style);
+    drawSkinShape(ctx, cab, COLOR_TRUCK_CAB, style);
+    return;
+  }
   ctx.fillStyle = COLOR_TRUCK;
   ctx.fillRect(boxX, y + 6, w - cabW - 4, CELL - 12);
   ctx.fillStyle = COLOR_TRUCK_CAB;
@@ -295,8 +375,23 @@ function drawTruck(ctx: CanvasRenderingContext2D, e: Entity, x: number, y: numbe
   drawWheels(ctx, x, y, w);
 }
 
-function drawLog(ctx: CanvasRenderingContext2D, e: Entity, x: number, y: number) {
+function drawLog(
+  ctx: CanvasRenderingContext2D,
+  e: Entity,
+  x: number,
+  y: number,
+  style: BlockStyle,
+) {
   const w = e.width * CELL;
+  if (style !== "bisel") {
+    // Skins: tronco liso, sin vetas
+    const body = () => {
+      ctx.beginPath();
+      ctx.roundRect(x + 2, y + 6, w - 4, CELL - 12, 8);
+    };
+    drawSkinShape(ctx, body, COLOR_LOG_SKIN, style);
+    return;
+  }
   ctx.fillStyle = COLOR_LOG;
   ctx.beginPath();
   ctx.roundRect(x + 2, y + 6, w - 4, CELL - 12, 8);
@@ -311,10 +406,25 @@ function drawLog(ctx: CanvasRenderingContext2D, e: Entity, x: number, y: number)
   }
 }
 
-function drawTurtles(ctx: CanvasRenderingContext2D, e: Entity, x: number, y: number) {
+function drawTurtles(
+  ctx: CanvasRenderingContext2D,
+  e: Entity,
+  x: number,
+  y: number,
+  style: BlockStyle,
+) {
   for (let i = 0; i < e.width; i++) {
     const cx = x + i * CELL + CELL / 2;
     const cy = y + CELL / 2;
+    if (style !== "bisel") {
+      // Skins: caparazón liso; sumergida = la misma forma atenuada
+      const shell = () => {
+        ctx.beginPath();
+        ctx.arc(cx, cy, CELL / 2 - 5, 0, Math.PI * 2);
+      };
+      drawSkinShape(ctx, shell, COLOR_TURTLE, style, e.submerged ? SKIN_SUBMERGED_ALPHA : 1);
+      continue;
+    }
     ctx.beginPath();
     ctx.arc(cx, cy, CELL / 2 - 5, 0, Math.PI * 2);
     if (e.submerged) {
@@ -337,16 +447,16 @@ function drawTurtles(ctx: CanvasRenderingContext2D, e: Entity, x: number, y: num
 }
 
 /** Dibuja las entidades de un carril; las que cruzan el borde se recortan con el canvas. */
-export function drawLane(ctx: CanvasRenderingContext2D, lane: Lane) {
+export function drawLane(ctx: CanvasRenderingContext2D, lane: Lane, style: BlockStyle) {
   const y = lane.row * CELL;
   lane.entities.forEach((e, i) => {
     const x = e.col * CELL;
     if (x >= W || x + e.width * CELL <= 0) return;
     if (e.type === "car") {
-      drawCar(ctx, e, x, y, COLOR_CARS[(lane.row + i) % COLOR_CARS.length], lane.dir);
-    } else if (e.type === "truck") drawTruck(ctx, e, x, y, lane.dir);
-    else if (e.type === "log") drawLog(ctx, e, x, y);
-    else drawTurtles(ctx, e, x, y);
+      drawCar(ctx, e, x, y, COLOR_CARS[(lane.row + i) % COLOR_CARS.length], lane.dir, style);
+    } else if (e.type === "truck") drawTruck(ctx, e, x, y, lane.dir, style);
+    else if (e.type === "log") drawLog(ctx, e, x, y, style);
+    else drawTurtles(ctx, e, x, y, style);
   });
 }
 
@@ -364,6 +474,7 @@ export function drawFrog(
   cy: number,
   facing: Dir,
   t: number,
+  style: BlockStyle,
   silhouette = false,
 ) {
   const hop = Math.sin(t * Math.PI); // 0 en reposo, 1 a mitad de salto
@@ -371,18 +482,41 @@ export function drawFrog(
   ctx.translate(cx, cy);
   ctx.rotate(FACING_ANGLE[facing]);
   ctx.scale(1 + 0.25 * hop, 1 + 0.25 * hop);
-  ctx.fillStyle = silhouette ? "#1fbf63" : COLOR_FROG;
+  const color = silhouette ? "#1fbf63" : COLOR_FROG;
   // Patas: más abiertas durante el salto
   const spread = 4 + 7 * hop;
-  for (const side of [-1, 1]) {
+  if (style === "bisel") {
+    ctx.fillStyle = color;
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.ellipse(side * (FROG_BODY_W / 2 + 1), -spread, 4, 7, side * 0.5, 0, Math.PI * 2);
+      ctx.ellipse(side * (FROG_BODY_W / 2 - 1), spread + 4, 4, 7, -side * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.beginPath();
-    ctx.ellipse(side * (FROG_BODY_W / 2 + 1), -spread, 4, 7, side * 0.5, 0, Math.PI * 2);
-    ctx.ellipse(side * (FROG_BODY_W / 2 - 1), spread + 4, 4, 7, -side * 0.5, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, FROG_BODY_W / 2, FROG_BODY_H / 2, 0, 0, Math.PI * 2);
     ctx.fill();
+  } else {
+    // Skins: cada pata y el cuerpo como formas separadas (sin trazos de unión entre elipses)
+    for (const side of [-1, 1]) {
+      const front = () => {
+        ctx.beginPath();
+        ctx.ellipse(side * (FROG_BODY_W / 2 + 1), -spread, 4, 7, side * 0.5, 0, Math.PI * 2);
+      };
+      const back = () => {
+        ctx.beginPath();
+        ctx.ellipse(side * (FROG_BODY_W / 2 - 1), spread + 4, 4, 7, -side * 0.5, 0, Math.PI * 2);
+      };
+      drawSkinShape(ctx, front, color, style);
+      drawSkinShape(ctx, back, color, style);
+    }
+    const body = () => {
+      ctx.beginPath();
+      ctx.ellipse(0, 0, FROG_BODY_W / 2, FROG_BODY_H / 2, 0, 0, Math.PI * 2);
+    };
+    drawSkinShape(ctx, body, color, style);
   }
-  ctx.beginPath();
-  ctx.ellipse(0, 0, FROG_BODY_W / 2, FROG_BODY_H / 2, 0, 0, Math.PI * 2);
-  ctx.fill();
+  // Ojos iguales en todas las skins: marcan hacia dónde mira la rana
   for (const side of [-1, 1]) {
     ctx.fillStyle = COLOR_FROG_EYE;
     ctx.beginPath();
@@ -397,11 +531,11 @@ export function drawFrog(
 }
 
 /** Rana en su posición, interpolada entre origen y destino durante el salto. */
-export function drawFrogAt(ctx: CanvasRenderingContext2D, frog: Frog) {
+export function drawFrogAt(ctx: CanvasRenderingContext2D, frog: Frog, style: BlockStyle) {
   const t = frog.animating ? Math.min(frog.animT / JUMP_MS, 1) : 0;
   const col = frog.animating ? frog.fromCol + (frog.targetCol - frog.fromCol) * t : frog.col;
   const row = frog.animating ? frog.fromRow + (frog.targetRow - frog.fromRow) * t : frog.row;
-  drawFrog(ctx, col * CELL + CELL / 2, row * CELL + CELL / 2, frog.facing, t);
+  drawFrog(ctx, col * CELL + CELL / 2, row * CELL + CELL / 2, frog.facing, t, style);
 }
 
 /** Barra de tiempo en la franja inferior de la fila de salida (lo único que el HUD de React no muestra). */
