@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import { ArkanoidCanvas } from "@/components/arkanoid-canvas";
 import { AsteroidsCanvas } from "@/components/asteroids-canvas";
+import { FroggerCanvas } from "@/components/frogger-canvas";
 import { SnakeCanvas } from "@/components/snake-canvas";
 import { TetrisCanvas } from "@/components/tetris-canvas";
 import { BLOCK_STYLES } from "./tetris/constants";
@@ -90,6 +91,18 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     hasLives: false,
     blockStyles: BLOCK_STYLES,
     aspect: "17 / 15",
+    touch: { dpad: ["up", "down", "left", "right"] },
+  },
+  frogger: {
+    Canvas: FroggerCanvas,
+    controls: [
+      { keys: ["←", "↑", "→", "↓"], label: "saltar" },
+      { keys: ["WASD"], label: "saltar" },
+      { keys: ["P"], label: "pausa" },
+    ],
+    engineLevel: true,
+    hasLives: true,
+    aspect: "8 / 7",
     touch: { dpad: ["up", "down", "left", "right"] },
   },
 };
