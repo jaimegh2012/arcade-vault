@@ -19,6 +19,10 @@ export const GOAL_COUNT = 5;
 export const GOAL_WIDTH = 2; // columnas por boca
 export const GOAL_COLS = [1, 4, 7, 10, 13] as const; // columna izquierda de cada boca
 
+// Periodo del anillo de cada carril: COLS + ancho máximo de entidad (4), así toda entidad
+// sale por completo antes de reaparecer por el lado opuesto con espaciado uniforme
+export const LANE_PERIOD = COLS + 4;
+
 export const MAX_DT = 0.05; // s, tope para no saltar al volver de otra pestaña
 export const JUMP_MS = 120; // duración de la animación de salto
 
