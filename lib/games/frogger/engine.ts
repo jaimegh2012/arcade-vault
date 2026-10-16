@@ -6,6 +6,7 @@ import {
   JUMP_MS,
   MAX_DT,
   POINTS_PER_GOAL,
+  POINTS_PER_ROUND,
   POINTS_PER_ROW,
   POINTS_PER_TIME_SECOND,
   ROUND_TIME_MIN_S,
@@ -160,11 +161,17 @@ export function createFroggerGame(
     }
   }
 
-  // Los pasos 6 y 7 del plan rellenan estos dos puntos de entrada.
+  // Los 5 bocas llenas: +200, siguiente nivel con carriles más rápidos y menos tiempo.
   function completeRound() {
-    // Siguiente ronda: nivel, carriles, bocas y temporizador
+    setScore(score + POINTS_PER_ROUND);
+    level += 1;
+    callbacks.onLevel(level);
+    lanes = buildLanes(level);
+    goals = Array.from({ length: GOAL_COUNT }, () => false);
+    respawn();
   }
 
+  // El paso 7 del plan rellena este punto de entrada.
   function killFrog() {
     // Restar vida, reiniciar posición/temporizador o terminar la partida
   }
