@@ -130,6 +130,7 @@ export function createFroggerGame(
     pendingDir = null;
     bestRow = ROW_START;
     timeLeft = roundTime(level);
+    phase = "waiting"; // el tiempo vuelve a correr con el primer salto
   }
 
   // Resuelve la celda donde acaba de aterrizar la rana.
@@ -171,9 +172,17 @@ export function createFroggerGame(
     respawn();
   }
 
-  // El paso 7 del plan rellena este punto de entrada.
+  // Muerte por vehículo, agua, tortuga, borde, boca inválida o tiempo agotado.
   function killFrog() {
-    // Restar vida, reiniciar posición/temporizador o terminar la partida
+    if (phase === "over") return;
+    lives -= 1;
+    callbacks.onLives(lives);
+    if (lives <= 0) {
+      phase = "over";
+      callbacks.onGameOver(score);
+      return;
+    }
+    respawn();
   }
 
   function startJump(dir: Dir) {
