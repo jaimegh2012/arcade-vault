@@ -1,6 +1,6 @@
 # 12 — Autenticación real con Supabase Auth
 
-- **Estado:** Aprobado
+- **Estado:** Implementado
 - **Depende de:** SPEC 04, SPEC 06
 - **Fecha:** 2026-10-18
 
