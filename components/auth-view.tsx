@@ -112,7 +112,7 @@ function SignUpForm() {
         />
         <FieldError id="up-email-err" message={errors.email} />
       </div>
-      <PasswordField autoComplete="new-password" error={errors.password} />
+      <PasswordField autoComplete="new-password" error={errors.password} showRules />
       <button
         className="btn lg"
         type="submit"
