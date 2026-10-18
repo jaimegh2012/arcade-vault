@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 export type SubmitScoreInput = { gameId: string; name: string; score: number };
 export type SubmitScoreResult = { ok: true } | { ok: false; error: string };
 
-const NAME_RE = /^[A-Z0-9]{1,3}$/;
+const NAME_RE = /^[A-Z0-9_]{1,12}$/;
 const SCORE_MAX = 9_999_999;
 const GENERIC_ERROR = "No se pudo guardar la puntuación. Inténtalo de nuevo.";
 
@@ -17,7 +17,7 @@ export async function submitScore(input: SubmitScoreInput): Promise<SubmitScoreR
   const score = input?.score;
 
   if (!NAME_RE.test(name)) {
-    return { ok: false, error: "Las iniciales deben tener 1-3 caracteres (A-Z, 0-9)." };
+    return { ok: false, error: "El nombre debe tener 1-12 caracteres (A-Z, 0-9, _)." };
   }
   if (!Number.isInteger(score) || score < 0 || score > SCORE_MAX) {
     return { ok: false, error: "Puntuación fuera de rango." };
