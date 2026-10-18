@@ -1411,6 +1411,94 @@ a {
   padding: 12px;
   font-size: 9px;
 }
+/* Auth: errores, aviso, toggle de contraseña, enlaces */
+.field.has-error input {
+  border-color: var(--magenta);
+}
+.field-error {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--magenta);
+  text-shadow: 0 0 8px rgba(255, 0, 110, 0.45);
+}
+.auth-alert,
+.auth-notice {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  border: 1px solid var(--magenta);
+  border-left-width: 3px;
+  background: rgba(255, 0, 110, 0.08);
+  color: var(--ink);
+}
+.auth-notice {
+  border-color: var(--cyan);
+  background: rgba(0, 245, 255, 0.07);
+}
+.pw-wrap {
+  position: relative;
+  display: flex;
+}
+.pw-wrap input {
+  flex: 1;
+  min-width: 0;
+  padding-right: 84px;
+}
+.pw-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  min-width: 76px;
+  padding: 0 12px;
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-dim);
+  font-family: var(--pixel);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+.pw-toggle:hover,
+.pw-toggle:focus-visible {
+  color: var(--cyan);
+  outline: 0;
+  text-shadow: 0 0 6px rgba(0, 245, 255, 0.5);
+}
+.auth-link {
+  display: block;
+  margin: 2px 0 0;
+  padding: 6px 0;
+  background: none;
+  border: 0;
+  color: var(--ink-dim);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.auth-link:hover,
+.auth-link:focus-visible {
+  color: var(--cyan);
+  outline: 0;
+}
+.auth-sub {
+  margin: 0 0 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-dim);
+}
+.auth-card .btn[disabled] {
+  opacity: 0.6;
+  cursor: progress;
+}
 
 /* ===== salón ===== */
 .av-hall {
