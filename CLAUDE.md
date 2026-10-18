@@ -26,17 +26,17 @@ There is no test runner. Features are verified by hand in the browser, usually t
 
 ## Routes (`app/`)
 
-| Route                | Page            | Notes                                                                                                        |
-| -------------------- | --------------- | ------------------------------------------------------------------------------------------------------------ |
-| `/`                  | `HomeView`      | Landing; first 6 games from `getGames()`                                                                     |
-| `/biblioteca`        | `LibraryView`   | Catalog: search + category chips + `GameCard` grid                                                           |
-| `/juegos/[id]`       | detail          | Cover, stats, per-game `Leaderboard`                                                                         |
-| `/juegos/[id]/jugar` | `GamePlayer`    | HUD + CRT arena + game-over modal; `submitScore` action                                                      |
-| `/salon`             | Hall of Fame    | Per-game tabs, `Podium` (top 3), full ranked table                                                           |
-| `/acerca-de`         | About + contact | `sendContact` action (Resend)                                                                                |
+| Route                | Page            | Notes                                                                                                           |
+| -------------------- | --------------- | --------------------------------------------------------------------------------------------------------------- |
+| `/`                  | `HomeView`      | Landing; first 6 games from `getGames()`                                                                        |
+| `/biblioteca`        | `LibraryView`   | Catalog: search + category chips + `GameCard` grid                                                              |
+| `/juegos/[id]`       | detail          | Cover, stats, per-game `Leaderboard`                                                                            |
+| `/juegos/[id]/jugar` | `GamePlayer`    | HUD + CRT arena + game-over modal; `submitScore` action                                                         |
+| `/salon`             | Hall of Fame    | Per-game tabs, `Podium` (top 3), full ranked table                                                              |
+| `/acerca-de`         | About + contact | `sendContact` action (Resend)                                                                                   |
 | `/auth`              | login/signup    | Supabase Auth: email+password, Google, GitHub, password recovery (`AuthView`). Redirects to `/` with a session. |
-| `/auth/nueva-clave`  | new password    | Reached from the recovery email via `/auth/callback?next=…`; `updatePassword` action.                        |
-| `/auth/callback`     | route handler   | `exchangeCodeForSession` for OAuth/recovery; `next` only internal paths; error → `/auth?error=oauth`.        |
+| `/auth/nueva-clave`  | new password    | Reached from the recovery email via `/auth/callback?next=…`; `updatePassword` action.                           |
+| `/auth/callback`     | route handler   | `exchangeCodeForSession` for OAuth/recovery; `next` only internal paths; error → `/auth?error=oauth`.           |
 
 Pages are Server Components that fetch through `lib/games-repo.ts` and pass data into `"use client"` view components in `components/`.
 
@@ -55,7 +55,7 @@ Pages are Server Components that fetch through `lib/games-repo.ts` and pass data
 - `lib/data.ts` — shared types only (`Game`, `GameCategory`, `GameColor`, `GameStats`, `ScoreRow`, `CATS`). The mock catalog is gone; Supabase is the source of truth.
 - `lib/format.ts` — `formatPlays()` (`12.4K`), `formatBest()`.
 - Server Actions:
-  - `submitScore` (`app/juegos/[id]/jugar/actions.ts`) — revalidates the arguments itself (initials `^[A-Z0-9]{1,3}$`, score integer 0–9 999 999, game must exist), then revalidates `/salon` and `/juegos/<id>`.
+  - `submitScore` (`app/juegos/[id]/jugar/actions.ts`) — revalidates the arguments itself (name `^[A-Z0-9_]{1,12}$` — username completo prellenado si hay sesión, score integer 0–9 999 999, game must exist), then revalidates `/salon` and `/juegos/<id>`.
   - `sendContact` (`app/acerca-de/actions.ts`) — `useActionState` shape, honeypot field, Resend send.
 - `supabase/migrations/` — timestamped SQL. `games`, `scores` and `profiles` (see **Auth**) with RLS. `games`/`scores`: public `select` on both, public `insert` on `scores` only (constraints repeated in the policy). Schema changes go in a **new** migration file; never edit an applied one. The `supabase` MCP server is configured in `.mcp.json`.
 - Env vars live in `.env.local` (git-ignored) and are documented in `.env.example`: Resend (`RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `RESEND_FROM`) and Supabase. Nothing secret gets a `NEXT_PUBLIC_` prefix.

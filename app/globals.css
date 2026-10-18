@@ -1025,6 +1025,10 @@ a {
 }
 .lb-row .pl {
   color: var(--ink);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .lb-row .sc {
   text-align: right;
@@ -1328,6 +1332,7 @@ a {
 }
 .modal .input-row input {
   flex: 1;
+  min-width: 0;
   height: 44px;
   padding: 0 12px;
   background: var(--bg);

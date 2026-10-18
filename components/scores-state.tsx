@@ -12,7 +12,7 @@ export function ScoresEmpty({ gameId, compact = false }: { gameId: string; compa
       </div>
       <div className="ss-title pixel">AÚN NO HAY PUNTUACIONES</div>
       <div className="ss-title pixel neon-yellow">SÉ EL PRIMERO</div>
-      <p className="ss-text">Termina una partida y guarda tus iniciales para abrir el ranking.</p>
+      <p className="ss-text">Termina una partida y guarda tu nombre para abrir el ranking.</p>
       <Link href={`/juegos/${gameId}/jugar`} className="btn yellow">
         JUGAR AHORA
       </Link>

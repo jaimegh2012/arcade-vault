@@ -144,14 +144,14 @@ export default function GamePlayer({ game }: { game: Game }) {
   const level = entry?.engineLevel ? engineLevel : Math.floor(score / 2500) + 1;
   const showLives = entry ? entry.hasLives : true;
   const name = user ? user.name : "INVITADO";
-  // Iniciales sugeridas a partir del usuario (A-Z0-9, máx. 3); vacío si no hay.
+  // Nombre sugerido: username completo (A-Z0-9_, máx. 12); vacío si no hay sesión.
   const initials =
     initialsOverride ??
     (user
       ? user.name
           .toUpperCase()
-          .replace(/[^A-Z0-9]/g, "")
-          .slice(0, 3)
+          .replace(/[^A-Z0-9_]/g, "")
+          .slice(0, 12)
       : "");
 
   useEffect(() => {
@@ -428,14 +428,14 @@ export default function GamePlayer({ game }: { game: Game }) {
                       setInitialsOverride(
                         e.target.value
                           .toUpperCase()
-                          .replace(/[^A-Z0-9]/g, "")
-                          .slice(0, 3),
+                          .replace(/[^A-Z0-9_]/g, "")
+                          .slice(0, 12),
                       )
                     }
-                    maxLength={3}
+                    maxLength={12}
                     disabled={saving}
-                    placeholder="TUS INICIALES"
-                    aria-label="Tus iniciales (1 a 3 caracteres)"
+                    placeholder="TU NOMBRE"
+                    aria-label="Tu nombre (1 a 12 caracteres)"
                   />
                   <button className="btn yellow" onClick={save} disabled={saving}>
                     {saving ? "GUARDANDO…" : saveError ? "REINTENTAR" : "GUARDAR PUNTUACIÓN"}
