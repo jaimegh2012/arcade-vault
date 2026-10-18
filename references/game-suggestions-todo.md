@@ -21,6 +21,7 @@ Las filas no se borran: sólo cambia la columna **Estado** cuando el usuario dec
 | 008 | 2026-10-08 | `duelo-pixel` | DUELO PIXEL | VERSUS    | Descartado  | Sugerido     |
 | 009 | 2026-10-08 | `columnas`    | COLUMNAS    | PUZZLE    | Descartado  | Sugerido     |
 | 010 | 2026-10-12 | `gloton`      | GLOTÓN      | ARCADE    | Recomendado | Spec escrita |
+| 011 | 2026-10-17 | `invasores`   | INVASORES   | SHOOTER   | Recomendado | Spec escrita |
 
 ## Fichas
 
@@ -118,3 +119,22 @@ Implementado · spec 09 · motor en `lib/games/snake/` · sin código de referen
   - `specs/game-jam/gloton/C-juego-gloton.md` — de autor: 5 niveles, 2 trazados, cuarteto con personalidades, frutas, audio sintetizado y salto de nivel.
 
   Catálogo: **`INSERT`** en `games` con `sort_order: 4` (la tabla real sólo usa 1, 2, 3 y 6; `20261005120000_remove_unimplemented_games.sql` borró la fila placeholder `gloton` y sus `scores` por cascada, así que no hay placeholder que actualizar). Portada **reutilizada**: `.cover-glot` ya existe en `app/globals.css`. Al promover: copiar la variante elegida a **`specs/10-juego-gloton.md`** con `Estado: Aprobado` y ejecutar `/spec-impl 10-juego-gloton` (`/spec-impl` no recursa en `specs/`, así que la promoción es manual).
+
+### 011 — INVASORES (`invasores`) · game jam
+
+- **Fecha:** 2026-10-17 · **Veredicto:** Recomendado · **Estado:** Spec escrita
+- **Pitch (1 frase):** Una formación de 55 alienígenas marcha y desciende hacia la superficie mientras el cañón se cubre tras cuatro búnkeres que se deshacen impacto a impacto.
+- **Categoría / color propuestos:** SHOOTER / green
+- **Encaje técnico:** **Alto, confirmado.** Todo es aritmética de rectángulos sobre canvas 2D: marcha en bloque con paso discreto (`STEP_X = 8` px cada `80 + 13 × (vivos − 1)` ms), inversión y descenso de 16 px al borde, un único disparo del jugador en pantalla, bombas desde los invasores más bajos de cada columna y colisiones AABB. **Sin assets en ninguna variante**: invasores, cañón y búnkeres se dibujan con rectángulos, y en C el audio se sintetiza con Web Audio API. El punto fino que señalaba la ficha 005 (búnkeres destructibles) se resuelve con una máscara de celdas `boolean[8][12]` de 6×6 px por búnker, destruyendo celda + 4 vecinas por impacto. Canvas lógico 800×600, `aspect` por defecto `4 / 3`. Módulos `constants` / `entities` / `input` / `engine`, más `levels.ts` y `audio.ts` en C.
+- **Encaje de scoring:** **Alto, pero con una tensión que el jam convierte en el eje de comparación.** La puntuación clásica (30/20/20/10/10 por fila) da un techo de sólo **990** por ola: con una ola única (variante A) todas las partidas perfectas empatan, igual que ya pasa con Snake y sus 2520. A lo acepta y lo declara; **B** lo resuelve con el delator (techo **10 450**) y **C** con olas, nodriza y bonus (techo **16 950**). Los tres caben en `0–9 999 999`, y los tres tienen el mismo fin triple e inequívoco: vidas a 0, formación en `y = 520`, o victoria.
+- **Diversidad:** **Alto.** Aporta tres mecánicas que el catálogo no tiene: enemigos que disparan de vuelta, formación que desciende y coberturas destructibles. Repite categoría SHOOTER con `asteroides`, tensión ya reconocida en la ficha 005 y aceptada: aquella es nave vectorial con inercia y 360°, ésta es un cañón horizontal sin inercia.
+- **HUD / `GameEntry` previsto:** común a las tres: `hasLives: true`, `touch: { dpad: ["left","right"], buttons: [{ id: "a", label: "DISPARAR" }] }`, aspecto por defecto. A: `engineLevel: false`, sin cambios de contrato. B: `engineLevel: false` + campo nuevo `hasChain`/`onChain` (HUD `CADENA`, calcado de `hasLines`/`onLines` del SPEC 07). C: `engineLevel: true`, `hasSound: true`, `levelJump: 5`, sin cambios de contrato (reusa lo del SPEC 08).
+- **Descartado a favor de / en contra de:** no hubo competencia real. De las fichas no implementadas, `ranaria` ya se construyó como `frogger`, `gloton` ya tiene su jam (ficha 010), y `duelo-pixel` y `columnas` están descartados por criterio. `invasores` era el único `Recomendado` sin consumir.
+- **Notas:** Entrada de **game jam**, no de `game-planner`: desarrolla la ficha 005 (misma `id`, misma portada) y la convierte en tres diseños completos y comparables del mismo juego, en estado `Borrador`. **La ficha 005 se deja en `Sugerido` a propósito**: la decisión de aceptarla es del usuario tras revisar los specs.
+  - `specs/game-jam/invasores/00-brief.md` — estado real del catálogo, identidad común, tabla comparativa y recomendación (**variante B**).
+  - `specs/game-jam/invasores/00-preguntas.md` — 16 dudas abiertas, cada una con el valor por defecto ya aplicado en los specs.
+  - `specs/game-jam/invasores/A-juego-invasores.md` — mínima fiel: una sola ola de 55, 3 vidas, 4 búnkeres, sin audio. Techo 990.
+  - `specs/game-jam/invasores/B-juego-invasores.md` — twist «el delator»: siempre hay un invasor marcado que vale ×5 y encadena; bonus final `mejor cadena × 100`. Techo 10 450.
+  - `specs/game-jam/invasores/C-juego-invasores.md` — de autor: 5 olas con tabla de dificultad, nave nodriza, vida extra a los 5000, audio sintetizado y salto de ola. Techo 16 950.
+
+  Catálogo: **`INSERT`** en `games` con `sort_order: 7` (la tabla real usa 1, 2, 3, 5 y 6; el `5` que la ficha 005 proponía lo ocupó `frogger` en `20261015120000_game_frogger.sql` y el `4` está comprometido con la jam de `gloton`). No hace falta `delete from public.scores`: `20261005120000_remove_unimplemented_games.sql` ya borró la fila placeholder `invasores` y sus `scores` por cascada. Portada **reutilizada**: `.cover-invaders` ya existe en `app/globals.css:758` y hoy está huérfana. Al promover: copiar la variante elegida a **`specs/12-juego-invasores.md`** con `Estado: Aprobado` y ejecutar `/spec-impl 12-juego-invasores` (`/spec-impl` no recursa en `specs/`, así que la promoción es manual).
