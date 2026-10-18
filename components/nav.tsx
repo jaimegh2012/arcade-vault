@@ -1,25 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { setUser as persistUser, useUser } from "@/lib/session";
+import { usePathname, useRouter } from "next/navigation";
+import { signOut } from "@/app/auth/actions";
+import { useUser } from "@/lib/session";
 
 export default function Nav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [signingOut, startSignOut] = useTransition();
+  const menuRef = useRef<HTMLDivElement>(null);
   const user = useUser();
+
+  // Dropdown de usuario: se cierra con clic fuera o Escape.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen]);
 
   const isActive = (name: "inicio" | "biblioteca" | "salon" | "about" | "auth") => {
     if (name === "inicio") return pathname === "/";
-    if (name === "biblioteca") return pathname.startsWith("/biblioteca") || pathname.startsWith("/juegos");
+    if (name === "biblioteca")
+      return pathname.startsWith("/biblioteca") || pathname.startsWith("/juegos");
     if (name === "salon") return pathname.startsWith("/salon");
     if (name === "about") return pathname.startsWith("/acerca-de");
     return pathname.startsWith("/auth");
   };
 
   const handleSignOut = () => {
-    persistUser(null);
+    setMenuOpen(false);
+    setOpen(false);
+    startSignOut(async () => {
+      await signOut();
+      router.refresh();
+    });
   };
 
   return (
@@ -51,19 +79,29 @@ export default function Nav() {
           <span>CRÉDITOS · 03</span>
         </div>
         {user ? (
-          <button className="btn ghost auth-btn" onClick={handleSignOut}>
-            {user.name} ▾
-          </button>
+          <div className="user-menu" ref={menuRef}>
+            <button
+              className="btn ghost auth-btn"
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((v) => !v)}
+            >
+              {user.name} ▾
+            </button>
+            {menuOpen && (
+              <div className="user-menu-list" role="menu">
+                <button role="menuitem" onClick={handleSignOut} disabled={signingOut} autoFocus>
+                  {signingOut ? "SALIENDO…" : "CERRAR SESIÓN"}
+                </button>
+              </div>
+            )}
+          </div>
         ) : (
           <Link href="/auth" className="btn auth-btn">
             Iniciar Sesión
           </Link>
         )}
-        <button
-          className="btn ghost hamburger"
-          onClick={() => setOpen(true)}
-          aria-label="Menú"
-        >
+        <button className="btn ghost hamburger" onClick={() => setOpen(true)} aria-label="Menú">
           ≡
         </button>
       </nav>
@@ -104,13 +142,22 @@ export default function Nav() {
         >
           Acerca de
         </Link>
-        <Link
-          href="/auth"
-          className={isActive("auth") ? "active" : ""}
-          onClick={() => setOpen(false)}
-        >
-          {user ? "Cuenta" : "Iniciar Sesión"}
-        </Link>
+        {user ? (
+          <>
+            <div className="panel-user">{user.name}</div>
+            <button className="panel-signout" onClick={handleSignOut} disabled={signingOut}>
+              {signingOut ? "Saliendo…" : "Cerrar sesión"}
+            </button>
+          </>
+        ) : (
+          <Link
+            href="/auth"
+            className={isActive("auth") ? "active" : ""}
+            onClick={() => setOpen(false)}
+          >
+            Iniciar Sesión
+          </Link>
+        )}
         <div style={{ flex: 1 }}></div>
         <div
           className="pixel"
