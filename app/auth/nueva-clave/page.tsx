@@ -43,6 +43,7 @@ export default function NuevaClavePage() {
             label="Contraseña nueva"
             autoComplete="new-password"
             error={state.fieldErrors?.password}
+            showRules
           />
           <button
             className="btn lg"

@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { PASSWORD_MIN, passwordComplexityError } from "@/lib/password";
 import { createClient } from "@/lib/supabase/server";
 
 export type AuthState = {
@@ -16,7 +17,6 @@ export type OAuthProvider = "google" | "github";
 const USERNAME_RE = /^[A-Za-z0-9_]{3,12}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const EMAIL_MAX = 254;
-const PASSWORD_MIN = 8;
 const PASSWORD_MAX = 72; // límite de bcrypt en Supabase
 
 const GENERIC_ERROR = "No se pudo completar la operación. Inténtalo de nuevo más tarde.";
@@ -35,7 +35,7 @@ function validatePassword(password: string) {
   if (password.length > PASSWORD_MAX) {
     return `La contraseña no puede superar ${PASSWORD_MAX} caracteres.`;
   }
-  return undefined;
+  return passwordComplexityError(password);
 }
 
 function validateEmail(email: string) {

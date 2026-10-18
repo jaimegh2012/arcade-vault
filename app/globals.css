@@ -1556,6 +1556,37 @@ a {
   outline: 0;
   text-shadow: 0 0 6px rgba(0, 245, 255, 0.5);
 }
+/* Pista de complejidad de contraseña (SPEC 13) */
+.pw-rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.pw-rules li {
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ink-dim);
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    text-shadow 0.15s;
+}
+.pw-rules li.ok {
+  color: var(--cyan);
+  border-color: var(--cyan);
+  text-shadow: 0 0 6px rgba(0, 245, 255, 0.45);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pw-rules li {
+    transition: none;
+  }
+}
 .auth-link {
   display: block;
   margin: 2px 0 0;
