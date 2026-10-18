@@ -1,6 +1,6 @@
 # 13 — Medidas de seguridad básicas
 
-- **Estado:** Aprobado
+- **Estado:** Implementado
 - **Depende de:** SPEC 06, SPEC 12
 - **Fecha:** 2026-10-18
 
