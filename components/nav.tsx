@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "@/app/auth/actions";
-import { useUser } from "@/lib/session";
+import { syncSession, useUser } from "@/lib/session";
 
 export default function Nav() {
   const pathname = usePathname();
@@ -14,6 +14,11 @@ export default function Nav() {
   const [signingOut, startSignOut] = useTransition();
   const menuRef = useRef<HTMLDivElement>(null);
   const user = useUser();
+
+  // Tras navegar (login/registro/logout hechos por Server Action) se resincroniza la sesión.
+  useEffect(() => {
+    void syncSession();
+  }, [pathname]);
 
   // Dropdown de usuario: se cierra con clic fuera o Escape.
   useEffect(() => {
@@ -46,6 +51,7 @@ export default function Nav() {
     setOpen(false);
     startSignOut(async () => {
       await signOut();
+      await syncSession();
       router.refresh();
     });
   };

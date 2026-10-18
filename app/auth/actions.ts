@@ -97,6 +97,12 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
     if (error.code === "user_already_exists" || error.code === "email_exists") {
       return { ok: false, fieldErrors: { email: "Ese correo ya está registrado." } };
     }
+    if (error.code === "over_email_send_rate_limit" || error.status === 429) {
+      return { ok: false, error: "Demasiados intentos. Espera unos minutos e inténtalo de nuevo." };
+    }
+    if (error.code === "email_address_invalid") {
+      return { ok: false, fieldErrors: { email: "Correo electrónico inválido." } };
+    }
     if (error.code === "weak_password") {
       return { ok: false, fieldErrors: { password: "Contraseña demasiado débil." } };
     }

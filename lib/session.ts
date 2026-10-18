@@ -49,6 +49,14 @@ function start() {
   });
 }
 
+// Las Server Actions escriben la cookie de sesión sin que el cliente del navegador lo note
+// (no hay evento de auth). Se vuelve a leer la cookie tras navegar, p. ej. login → "/".
+export async function syncSession() {
+  const { data } = await createClient().auth.getSession();
+  if (data.session) await loadProfile(data.session.user.id);
+  else setCachedUser(null);
+}
+
 function subscribe(listener: () => void) {
   start();
   listeners.add(listener);
