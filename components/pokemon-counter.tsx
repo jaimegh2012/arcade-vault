@@ -1,31 +1,44 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import Image from "next/image";
 
 // Total de especies en PokeAPI; al pasarlo se vuelve al #1
 const TOTAL = 1025;
 
-const artwork = (id: number) =>
-  `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+type Species = { id: number; name: string };
 
-export default function PokemonCounter() {
+function artworkUrl(id: number): string {
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+}
+
+// Convierte el contador (1, 2, 3…) en número de Pokédex, volviendo al #1 tras TOTAL
+function toDexId(count: number): number {
+  return ((count - 1) % TOTAL) + 1;
+}
+
+export default function PokemonCounter(): JSX.Element {
   const [count, setCount] = useState(1);
-  const [named, setNamed] = useState<{ id: number; name: string } | null>(null);
+  const [species, setSpecies] = useState<Species | null>(null);
 
-  const id = ((count - 1) % TOTAL) + 1;
+  const id = toDexId(count);
+  // Solo se muestra el nombre si corresponde al Pokémon actual
+  const name = species?.id === id ? species.name : null;
 
   // El nombre llega de PokeAPI; si falla, queda solo el número de Pokédex
   useEffect(() => {
-    const ctrl = new AbortController();
-    fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`, { signal: ctrl.signal })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((data: { name: string }) => setNamed({ id, name: data.name }))
-      .catch(() => {});
-    return () => ctrl.abort();
-  }, [id]);
+    const controller = new AbortController();
 
-  const name = named?.id === id ? named.name : null;
+    fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`, { signal: controller.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error(String(res.status));
+        return res.json() as Promise<{ name: string }>;
+      })
+      .then((data) => setSpecies({ id, name: data.name }))
+      .catch(() => {});
+
+    return () => controller.abort();
+  }, [id]);
 
   return (
     <section className="poke-counter fade-in">
@@ -36,7 +49,7 @@ export default function PokemonCounter() {
         <div className="poke-art">
           <Image
             key={id}
-            src={artwork(id)}
+            src={artworkUrl(id)}
             alt={name ?? `Pokémon número ${id}`}
             width={475}
             height={475}
