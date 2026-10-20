@@ -3664,3 +3664,76 @@ a {
     max-width: calc((100svh - 360px) * 8 / 7 + 48px);
   }
 }
+
+/* ---------- Contador Pokémon (/contador) ---------- */
+.poke-counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  padding: 40px 16px 64px;
+}
+.poke-screen {
+  width: min(100%, 420px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 20px 20px;
+  background: var(--bg);
+  border: 2px solid var(--cyan);
+  box-shadow:
+    0 0 24px color-mix(in srgb, var(--cyan) 35%, transparent),
+    inset 0 0 40px color-mix(in srgb, var(--cyan) 12%, transparent);
+}
+.poke-count {
+  font-size: clamp(48px, 16vw, 88px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.poke-art {
+  width: min(70vw, 320px);
+  aspect-ratio: 1;
+}
+.poke-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--magenta) 50%, transparent));
+  animation: poke-pop 0.28s steps(4, end);
+}
+.poke-name {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  min-height: 1.6em;
+}
+.poke-dex {
+  color: var(--cyan);
+  font-family: var(--font-pixel);
+  font-size: 12px;
+}
+.poke-label {
+  font-size: 22px;
+  text-transform: capitalize;
+}
+.poke-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+@keyframes poke-pop {
+  from {
+    transform: scale(0.8);
+    opacity: 0.4;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .poke-art img {
+    animation: none;
+  }
+}
