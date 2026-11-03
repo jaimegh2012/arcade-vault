@@ -15,6 +15,15 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   /* config options here */
   allowedDevOrigins: ["192.168.1.10"],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+        pathname: "/PokeAPI/sprites/**",
+      },
+    ],
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
